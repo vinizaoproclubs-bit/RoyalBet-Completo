@@ -98,42 +98,30 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
     display: none !important;
 }
     
+.auth-tabs{display:flex;gap:8px;margin:22px 0 16px}.auth-tabs button{flex:1;background:#242032;color:#ddd;border:1px solid #49405b}.auth-tabs button.selected{background:#8a2be2;color:white;border-color:#aa75f5}.auth-label{display:block;text-align:left;font-size:12px;color:#ccc;margin-top:14px}.auth-box .auth-primary{background:#8a2be2;color:#fff;font-weight:800}.auth-box .auth-secondary{background:transparent;border:1px solid #555;color:#ddd}.auth-box #auth-message{min-height:22px;font-size:13px;line-height:1.4}.auth-box h1{color:#ffd700;font-size:32px}
 </style>
 </head>
 <body>
-    <div id="auth-screen" class="auth-screen">
-
-    <div class="auth-box">
-
-        <h1>ROYAL PLAY</h1>
-
-        <p>Entre ou crie sua conta</p>
-
-        <input
-            id="auth-email"
-            type="email"
-            placeholder="E-mail"
-        >
-
-        <input
-            id="auth-password"
-            type="password"
-            placeholder="Senha"
-        >
-
-        <button onclick="Auth.login()">
-            ENTRAR
-        </button>
-
-        <button onclick="Auth.register()">
-            CRIAR CONTA
-        </button>
-
-        <button type="button" onclick="Auth.forgotPassword()">ESQUECI MINHA SENHA</button>
-        <p id="auth-message" role="status" aria-live="polite"></p>
-
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-box">
+    <h1>RoyalBet</h1>
+    <p>Jogo fictício • somente moedas virtuais</p>
+    <div class="auth-tabs" role="group" aria-label="Acesso à conta">
+      <button type="button" id="tab-login" class="selected" onclick="Auth.setMode('login')">ENTRAR</button>
+      <button type="button" id="tab-register" onclick="Auth.setMode('register')">CRIAR CONTA</button>
     </div>
-
+    <label class="auth-label" for="auth-email">E-mail</label>
+    <input id="auth-email" type="email" autocomplete="email" placeholder="Seu e-mail">
+    <label class="auth-label" for="auth-password">Senha</label>
+    <input id="auth-password" type="password" autocomplete="current-password" placeholder="Sua senha">
+    <div id="register-fields" class="hidden">
+      <label class="auth-label" for="auth-confirm">Confirmar senha</label>
+      <input id="auth-confirm" type="password" autocomplete="new-password" placeholder="Repita sua senha">
+    </div>
+    <button type="button" id="auth-submit" class="auth-primary" onclick="Auth.submit()">ENTRAR</button>
+    <button type="button" id="forgot-button" class="auth-secondary" onclick="Auth.forgotPassword()">Esqueci minha senha</button>
+    <p id="auth-message" role="status" aria-live="polite"></p>
+  </div>
 </div>
 <div id="recovery-screen" class="auth-screen hidden">
   <div class="auth-box">
@@ -148,11 +136,12 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
 <div id="app" class="hidden">
 <div class="demo-banner">🎰 ROYAL PLAY MODO DEMONSTRAÇÃO — CRÉDITOS SEM VALOR REAL 🎰</div>
 <header>
-<div class="logo">ROYAL PLAY<span>CASSINO VIRTUAL</span></div>
+<div class="logo">RoyalBet<span>JOGO FICTÍCIO</span></div>
 <div class="balance-container">
 <div class="balance-display">💰 <span id="global-balance">10,000.00</span></div>
 <button class="btn btn-gold" onclick="UI.showModal('add-coins-modal')">+ MOEDAS</button>
 <button class="btn" style="padding:8px;background:rgba(255,255,255,.1)" onclick="Sys.toggleSound()" id="sound-btn">🔊</button>
+<button class="btn btn-danger" type="button" onclick="Auth.logout()">SAIR DA CONTA</button>
 </div>
 </header>
 <nav>
@@ -212,7 +201,7 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
 <button class="btn btn-gold" id="crash-btn-bet" onclick="Crash.toggleBet()" style="padding:20px;font-size:18px">APOSTAR</button><div id="crash-msg" style="text-align:center;margin-top:10px;color:var(--text-muted);font-size:14px">Aguardando aposta...</div></div>
 <div class="game-area"><div class="crash-history-strip" id="crash-history-strip"></div><div class="crash-area"><div class="crash-multiplier" id="crash-mult">1.00x</div><div class="plane-container" id="crash-plane"><div class="plane">✈️</div></div></div></div></div>
 
-<div id="view-history" class="view-section hidden glass" style="padding:30px"><h2>📜 Histórico de Jogadas</h2><p style="margin-bottom:20px;color:var(--text-muted)">Suas últimas 50 partidas locais.</p><div style="overflow-x:auto"><table class="history-table"><thead><tr><th>Horário</th><th>Jogo</th><th>Aposta</th><th>Mult.</th><th>Prêmio</th><th>Resultado</th></tr></thead><tbody id="history-tbody"></tbody></table></div><div id="history-empty" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhuma jogada registrada ainda.</div></div>
+<div id="view-history" class="view-section hidden glass" style="padding:30px"><h2>📜 Histórico de Jogadas</h2><p style="margin-bottom:20px;color:var(--text-muted)">Suas últimas 50 partidas, salvas na sua conta.</p><div style="overflow-x:auto"><table class="history-table"><thead><tr><th>Horário</th><th>Jogo</th><th>Aposta</th><th>Mult.</th><th>Prêmio</th><th>Resultado</th></tr></thead><tbody id="history-tbody"></tbody></table></div><div id="history-empty" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhuma jogada registrada ainda.</div></div>
 
 <div id="view-help" class="view-section hidden glass" style="padding:30px"><h2 style="margin-bottom:20px">ℹ️ Como Jogar (Modo Demo)</h2><div class="help-grid">
 <div class="help-card"><h3>💣 Mine Bomber</h3><p>Defina sua aposta e o número de bombas. Clique nos quadrados para revelar diamantes. Cada diamante aumenta o multiplicador. Clique em Coletar para garantir o prêmio. Se encontrar uma bomba, a rodada termina.</p></div>
@@ -235,114 +224,146 @@ const SUPABASE_KEY = "sb_publishable_3jlJ296WNi59RcUEsm4WBA_4lz_HiQU";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const Auth = {
-
+    mode: 'login',
+    setMode(mode) {
+      this.mode = mode;
+      document.getElementById('register-fields').classList.toggle('hidden', mode !== 'register');
+      document.getElementById('forgot-button').classList.toggle('hidden', mode !== 'login');
+      document.getElementById('tab-login').classList.toggle('selected', mode === 'login');
+      document.getElementById('tab-register').classList.toggle('selected', mode === 'register');
+      document.getElementById('auth-submit').textContent = mode === 'login' ? 'ENTRAR' : 'CRIAR CONTA';
+      document.getElementById('auth-password').setAttribute('autocomplete', mode === 'login' ? 'current-password' : 'new-password');
+      this.message('');
+    },
+    async submit() { return this.mode === 'login' ? this.login() : this.register(); },
     async register() {
-        const email = document.getElementById("auth-email").value.trim();
-        const password = document.getElementById("auth-password").value;
-
-        if (!email || !password) {
-            this.message("Preencha o e-mail e a senha.");
-            return;
-        }
-
-        if (password.length < 6) {
-            this.message("A senha precisa ter pelo menos 6 caracteres.");
-            return;
-        }
-
-        const { error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password
-        });
-
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const confirmation = document.getElementById('auth-confirm').value;
+      if (!email || !password || !confirmation) { this.message('Preencha todos os campos.'); return; }
+      if (!document.getElementById('auth-email').checkValidity()) { this.message('Digite um e-mail válido.'); return; }
+      if (password.length < 6) { this.message('A senha precisa ter pelo menos 6 caracteres.'); return; }
+      if (password !== confirmation) { this.message('As senhas não são iguais.'); return; }
+      const button = document.getElementById('auth-submit');
+      button.disabled = true;
+      this.message('Criando conta...');
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) {
-            this.message(error.message);
-            return;
+          // O Supabase pode informar explicitamente que o usuário já existe,
+          // mas também pode ocultar essa informação para proteger a privacidade.
+          if (/already registered|already exists|user already registered/i.test(error.message || '')) {
+            this.message('Esse e-mail já está cadastrado. Entre ou recupere sua senha.');
+          } else { this.message('Não foi possível criar a conta: ' + error.message); }
+          return;
         }
-
-        this.message("Conta criada com sucesso!");
+        if (data.session) {
+          await this.showApp();
+        } else {
+          this.message('Se este e-mail puder ser cadastrado, confira a caixa de entrada para confirmar a conta. Se você já possui uma conta, use Entrar ou Esqueci minha senha.');
+        }
+      } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
+      finally { button.disabled = false; }
     },
-
     async login() {
-        const email = document.getElementById("auth-email").value.trim();
-        const password = document.getElementById("auth-password").value;
-
-        if (!email || !password) {
-            this.message("Preencha o e-mail e a senha.");
-            return;
-        }
-
-        const { error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      if (!email || !password) { this.message('Preencha o e-mail e a senha.'); return; }
+      const button = document.getElementById('auth-submit');
+      button.disabled = true;
+      this.message('Entrando...');
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
-            this.message("E-mail ou senha incorretos.");
-            return;
+          if (/email not confirmed/i.test(error.message || '')) this.message('Confirme seu e-mail antes de entrar.');
+          else this.message('E-mail ou senha incorretos. Confira os dados ou use Esqueci minha senha.');
+          return;
         }
-
-        this.showApp();
+        await this.showApp();
+      } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
+      finally { button.disabled = false; }
     },
-
     async forgotPassword() {
-        const email = document.getElementById('auth-email').value.trim();
-        if (!email) { this.message('Digite seu e-mail primeiro.'); return; }
-        this.message('Solicitando recuperação...');
-        try {
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: 'https://vinizaoproclubs-bit.github.io/RoyalBet-Completo/index.html'
-            });
-            if (error) { this.message('Não foi possível enviar agora. Aguarde e tente novamente.'); return; }
-            this.message('Se o e-mail puder receber mensagens de recuperação, você receberá um link. Confira também o spam.');
-        } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
+      const email = document.getElementById('auth-email').value.trim();
+      if (!email || !document.getElementById('auth-email').checkValidity()) { this.message('Digite um e-mail válido primeiro.'); return; }
+      this.message('Solicitando recuperação...');
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://vinizaoproclubs-bit.github.io/RoyalBet-Completo/index.html'
+        });
+        if (error) { this.message('Não foi possível enviar agora. Aguarde e tente novamente.'); return; }
+        this.message('Se o e-mail estiver cadastrado, você receberá um link. Confira também o spam.');
+      } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
     },
-
     showRecovery() {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app').classList.add('hidden');
-        document.getElementById('recovery-screen').classList.remove('hidden');
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('recovery-screen').classList.remove('hidden');
     },
-
     async saveNewPassword() {
-        const password = document.getElementById('recovery-password').value;
-        const confirmation = document.getElementById('recovery-confirm').value;
-        const message = document.getElementById('recovery-message');
-        const button = document.getElementById('recovery-submit');
-        if (password.length < 6) { message.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
-        if (password !== confirmation) { message.textContent = 'As senhas não são iguais.'; return; }
-        button.disabled = true;
-        message.textContent = 'Salvando nova senha...';
-        try {
-            const { error } = await supabaseClient.auth.updateUser({ password });
-            if (error) { message.textContent = 'Não foi possível alterar a senha. Solicite um novo link se ele expirou.'; return; }
-            message.textContent = 'Senha alterada! Voltando para a tela de login...';
-            await supabaseClient.auth.signOut();
-            history.replaceState(null, '', location.pathname + location.search);
-            document.getElementById('recovery-screen').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
-            this.message('Senha alterada. Entre com sua nova senha.');
-        } catch (e) { message.textContent = 'Falha de conexão. Tente novamente.'; }
-        finally { button.disabled = false; }
-    },
-
-    async logout() {
+      const password = document.getElementById('recovery-password').value;
+      const confirmation = document.getElementById('recovery-confirm').value;
+      const message = document.getElementById('recovery-message');
+      const button = document.getElementById('recovery-submit');
+      if (password.length < 6) { message.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
+      if (password !== confirmation) { message.textContent = 'As senhas não são iguais.'; return; }
+      button.disabled = true;
+      message.textContent = 'Salvando nova senha...';
+      try {
+        const { error } = await supabaseClient.auth.updateUser({ password });
+        if (error) { message.textContent = 'Não foi possível alterar a senha. Solicite um novo link se ele expirou.'; return; }
         await supabaseClient.auth.signOut();
+        recoveringPassword = false;
+        history.replaceState(null, '', location.pathname + location.search);
+        document.getElementById('recovery-screen').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
+        this.setMode('login');
+        this.message('Senha alterada! Entre com sua nova senha.');
+      } catch (e) { message.textContent = 'Falha de conexão. Tente novamente.'; }
+      finally { button.disabled = false; }
+    },
+    async logout() {
+      try {
+        await Sys.queue;
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) { alert('Não foi possível sair. Tente novamente.'); return; }
         location.reload();
+      } catch (e) { alert('Falha de conexão ao sair. Tente novamente.'); }
     },
-
-    message(text) {
-        document.getElementById("auth-message").textContent = text;
-    },
-
-    showApp() {
-        document.getElementById("auth-screen").classList.add("hidden");
-        document.getElementById("app").classList.remove("hidden");
+    message(text) { document.getElementById('auth-message').textContent = text; },
+    async showApp() {
+      const {data:{user},error}=await supabaseClient.auth.getUser();
+      if(error||!user)throw error||Error('Sem usuário');
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('recovery-screen').classList.add('hidden');
+      document.getElementById('app').classList.add('hidden');
+      try {await Sys.load(user);document.getElementById('app').classList.remove('hidden');}
+      catch(e){console.error(e);document.getElementById('auth-screen').classList.remove('hidden');this.message('Não foi possível carregar seu saldo. Execute o SQL no Supabase e atualize a página.');}
     }
-};
+  };
 const AudioSys={ctx:null,enabled:localStorage.getItem('rp_sound')!=='false',init(){if(!this.ctx){try{window.AudioContext=window.AudioContext||window.webkitAudioContext;this.ctx=new AudioContext()}catch(e){}}const b=document.getElementById('sound-btn');if(b)b.innerText=this.enabled?'🔊':'🔇'},toggle(){this.enabled=!this.enabled;localStorage.setItem('rp_sound',this.enabled);this.init();if(this.enabled&&this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},play(type){if(!this.enabled||!this.ctx)return;try{const o=this.ctx.createOscillator(),g=this.ctx.createGain(),n=this.ctx.currentTime;o.connect(g);g.connect(this.ctx.destination);let f=type==='win'?800:type==='lose'?300:type==='coin'?1200:type==='explosion'?100:type==='spin'?200:type==='tick'?150:600;o.type=type==='lose'||type==='explosion'?'sawtooth':type==='tick'?'square':'sine';o.frequency.setValueAtTime(f,n);g.gain.setValueAtTime(.08,n);g.gain.exponentialRampToValueAtTime(.01,n+.3);o.start(n);o.stop(n+.3)}catch(e){}}};
 
-const _savedBalance=parseFloat(localStorage.getItem('rp_balance')); const Sys={balance:Number.isFinite(_savedBalance)&&_savedBalance>=0?_savedBalance:10000,history:JSON.parse(localStorage.getItem('rp_history')||'[]'),updateBalance(a){this.balance=Math.max(0,this.balance+Number(a));localStorage.setItem('rp_balance',this.balance.toFixed(2));const txt=this.balance.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});const e=document.getElementById('global-balance');if(e)e.innerText=txt;const pc=document.getElementById('pc-credits');if(pc)pc.innerText=this.balance.toLocaleString('pt-BR',{maximumFractionDigits:0})+' CR';},checkBalance(a){a=Number(a);if(!Number.isFinite(a)||a<=0){alert('Valor de aposta inválido.');return false}if(a>this.balance){alert('Saldo insuficiente para esta aposta.');return false}return true},addHistory(game,bet,mult,prize,result){this.history.unshift({time:new Date().toLocaleTimeString('pt-BR'),game,bet:Number(bet),mult:String(mult),prize:Number(prize),result});this.history=this.history.slice(0,50);localStorage.setItem('rp_history',JSON.stringify(this.history));UI.renderHistory()},addCoins(a){AudioSys.init();AudioSys.play('coin');this.updateBalance(a);UI.hideModal('add-coins-modal')},resetDemo(){if(confirm('Deseja reiniciar seu saldo para 10.000 moedas e apagar o histórico?')){this.balance=10000;this.history=[];localStorage.setItem('rp_balance','10000.00');localStorage.setItem('rp_history','[]');this.updateBalance(0);UI.renderHistory();UI.nav('home');AudioSys.init();AudioSys.play('win')}},toggleSound(){AudioSys.init();AudioSys.toggle()}};
+// Saldo e histórico pertencem à conta autenticada, nunca ao navegador.
+const Sys={
+ balance:10000,history:[],ready:false,userId:null,queue:Promise.resolve(),pending:0,
+ renderBalance(){const v=Number(this.balance);const txt=v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});const e=document.getElementById('global-balance');if(e)e.innerText=txt;const pc=document.getElementById('pc-credits');if(pc)pc.innerText=v.toLocaleString('pt-BR',{maximumFractionDigits:0})+' CR'},
+ async load(user){
+  this.ready=false;this.userId=user.id;this.balance=10000;this.history=[];this.renderBalance();UI.renderHistory();
+  const {data:profile,error:initError}=await supabaseClient.rpc('royal_get_profile');
+  if(initError)throw initError;
+  const {data:history,error:historyError}=await supabaseClient.from('royal_game_history').select('played_at,game,bet,mult,prize,result').order('played_at',{ascending:false}).limit(50);
+  if(historyError)throw historyError;
+  this.balance=Number(profile.balance);this.history=(history||[]).map(h=>({time:new Date(h.played_at).toLocaleString('pt-BR'),game:h.game,bet:Number(h.bet),mult:h.mult,prize:Number(h.prize),result:h.result}));
+  this.renderBalance();UI.renderHistory();this.ready=true;
+ },
+ enqueue(job){const id=this.userId;this.pending++;this.queue=this.queue.then(async()=>{if(id!==this.userId)throw Error('Conta alterada');return await job()}).catch(e=>{this.ready=false;console.error('Erro ao salvar dados da conta:',e);alert('Falha ao salvar os dados no Supabase. O jogo foi bloqueado para evitar perda de saldo. Atualize a página e confira sua conexão.');}).finally(()=>{this.pending--});return this.queue},
+ updateBalance(amount){const delta=Math.round(Number(amount)*100)/100;if(!this.ready||!Number.isFinite(delta)){alert('Aguarde os dados da conta carregarem.');return}this.balance=Math.max(0,Math.round((this.balance+delta)*100)/100);this.renderBalance();this.enqueue(async()=>{const {data,error}=await supabaseClient.rpc('royal_change_balance',{p_delta:delta});if(error)throw error;if(this.pending===1){this.balance=Number(data);this.renderBalance()}})},
+ checkBalance(amount){const n=Number(amount);if(!this.ready){alert('Aguarde a sincronização da conta.');return false}if(!Number.isFinite(n)||n<=0){alert('Valor inválido.');return false}if(n>this.balance){alert('Saldo insuficiente.');return false}return true},
+ addHistory(game,bet,mult,prize,result){if(!this.ready)return;const h={time:new Date().toLocaleTimeString('pt-BR'),game,bet:Number(bet),mult:String(mult),prize:Number(prize),result};this.history.unshift(h);this.history=this.history.slice(0,50);UI.renderHistory();this.enqueue(async()=>{const {error}=await supabaseClient.from('royal_game_history').insert({user_id:this.userId,game,bet:Number(bet),mult:String(mult),prize:Number(prize),result});if(error)throw error})},
+ addCoins(amount){if(!this.checkBalance(0.01))return;const n=Number(amount);if(!Number.isFinite(n)||n<=0){alert('Valor inválido.');return}AudioSys.init();AudioSys.play('coin');this.updateBalance(n);UI.hideModal('add-coins-modal')},
+ resetDemo(){if(!this.ready)return;if(!confirm('Reiniciar o saldo DESTA CONTA para 10.000 moedas e apagar todo o histórico dela?'))return;this.ready=false;this.enqueue(async()=>{const {data,error}=await supabaseClient.rpc('royal_reset_account');if(error)throw error;this.balance=Number(data);this.history=[];this.renderBalance();UI.renderHistory();UI.nav('home');this.ready=true})},
+ toggleSound(){AudioSys.init();AudioSys.toggle()}
+};
 
 const UI={views:['home','games','history','help','game-mines','game-slots','game-penalty','game-crash'],nav(id){try{AudioSys.init();AudioSys.play('click')}catch(e){};this.views.forEach(v=>{const e=document.getElementById(v.startsWith('game-')?v:`view-${v}`);if(e)e.classList.add('hidden')});document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const t=document.getElementById(id.startsWith('game-')?id:`view-${id}`);if(!t)return;t.classList.remove('hidden');if(['home','games','history','help'].includes(id)){document.querySelectorAll('.nav-item').forEach(e=>{const s=e.innerText.toLowerCase();if((id==='home'&&s.includes('início'))||(id==='games'&&s.includes('jogos'))||(id==='history'&&s.includes('histórico'))||(id==='help'&&s.includes('como jogar')))e.classList.add('active')})}if(id==='game-mines'&&typeof Mines!=='undefined'&&!Mines.playing)Mines.initUI();if(id==='game-slots'&&typeof Slots!=='undefined'&&!Slots.spinning)Slots.initUI();if(id==='game-penalty'&&typeof Penalty!=='undefined'){if(!Penalty.initialized)Penalty.init();else Penalty.draw()}if(id==='game-crash'&&typeof Crash!=='undefined'){Crash.renderHistoryStrip();Crash.initIdleState()}if(id==='history')this.renderHistory();window.scrollTo(0,0)},loadGame(g){this.nav('game-'+g)},showModal(id){document.getElementById(id)?.classList.remove('hidden')},hideModal(id){document.getElementById(id)?.classList.add('hidden')},renderHistory(){const tb=document.getElementById('history-tbody'),empty=document.getElementById('history-empty');if(!tb||!empty)return;tb.innerHTML='';empty.classList.toggle('hidden',Sys.history.length>0);Sys.history.forEach(h=>{const tr=document.createElement('tr'),win=Number(h.prize)>0;tr.innerHTML=`<td>${h.time}</td><td><strong>${h.game}</strong></td><td>${Number(h.bet).toFixed(2)}</td><td class="${win?'text-success':'text-danger'}">${h.mult}</td><td class="${win?'text-success':''}">+${Number(h.prize).toFixed(2)}</td><td>${h.result}</td>`;tb.appendChild(tr)})}};
 
@@ -352,7 +373,7 @@ const Slots={symbols:['🐯','💎','🪙','🧧','🍊','⭐','🔔'],paytable:
 
 const Penalty={state:'IDLE',playing:false,initialized:false,bet:0,step:0,mults:[1.92,3.84,7.68,15.36,30.72],zone:{TL:{x:250,y:135},BL:{x:250,y:245},C:{x:400,y:190},TR:{x:550,y:135},BR:{x:550,y:245}},goal:true,phase:'NONE',progress:0,anim:null,credits(){return Sys.balance},setBet(v){if(this.state==='IDLE')document.getElementById('penalty-bet').value=v},setMaxBet(){if(this.state==='IDLE')document.getElementById('penalty-bet').value=Math.floor(Sys.balance)},start(){if(this.state!=='IDLE')return;const b=parseFloat(document.getElementById('penalty-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.step=0;Sys.updateBalance(-b);this.state='AIMING';this.playing=true;this.resetField();this.updateUI();this.hidePopup()},shootZone(z){if(this.state!=='AIMING')return;this.state='ANIMATING';this.goal=Math.random()<.52;const t=this.zone[z];this.ball.tx=t.x;this.ball.ty=t.y;const keys=Object.keys(this.zone),wk=keys.filter(k=>k!==z)[Math.floor(Math.random()*4)],g=this.goal?this.zone[wk]:t;this.gk.tx=g.x;this.gk.ty=g.y;this.phase='RUN';this.progress=0;this.updateUI()},nextPenalty(){if(this.state!=='DECISION')return;this.step++;this.state='AIMING';this.resetField();this.hidePopup();this.updateUI()},cashout(){if(this.state!=='DECISION')return;const m=this.mults[this.step];if(!Number.isFinite(m)||!Number.isFinite(this.bet))return;const p=Math.floor(this.bet*m);Sys.updateBalance(p);Sys.addHistory('Penalty Clash',this.bet,m+'x',p,'Coletado');this.showPopup('CRÉDITOS COLETADOS!',`Você recebeu ${p.toLocaleString('pt-BR')} CR virtuais.`);this.state='IDLE';this.playing=false;this.updateUI()},resolve(){if(this.goal){const m=this.mults[this.step];if(this.step===4){const p=Math.floor(this.bet*m);Sys.updateBalance(p);Sys.addHistory('Penalty Clash',this.bet,m+'x',p,'5 Gols');this.showPopup('SUPER GOL! 30,72x',`Você acertou os 5 pênaltis e ganhou ${p.toLocaleString('pt-BR')} CR!`);this.state='IDLE'}else{this.showPopup('GOL!',`Multiplicador atual: ${m}x`);this.state='DECISION'}}else{Sys.addHistory('Penalty Clash',this.bet,'0.00x',0,'Defesa');this.showPopup('DEFESA!','O goleiro pegou! Você perdeu os créditos da rodada.');this.state='IDLE'}if(this.state==='IDLE')this.playing=false;this.updateUI()},showPopup(t,s){document.getElementById('pc-popup-title').textContent=t;document.getElementById('pc-popup-sub').textContent=s;document.getElementById('pc-popup').classList.add('show')},hidePopup(){document.getElementById('pc-popup').classList.remove('show')},toggleRules(){document.getElementById('pc-modal').classList.toggle('active')},resetField(){this.ball={x:400,y:420,tx:400,ty:420,r:14};this.gk={x:400,y:200,tx:400,ty:200};this.kicker={x:330,y:430};this.phase='NONE';this.progress=0},updateUI(){document.getElementById('pc-credits').textContent=Sys.balance.toLocaleString('pt-BR',{maximumFractionDigits:0})+' CR';document.getElementById('pc-tracker').textContent=`PÊNALTI: ${this.step+1}/5`;for(let i=0;i<5;i++){const e=document.getElementById('pc-m'+(i+1));e.className='pc-mult';if(i<this.step)e.classList.add('done');else if(i===this.step)e.classList.add('active')}const z=document.getElementById('pc-zones'),st=document.getElementById('pc-start'),ca=document.getElementById('pc-cash'),co=document.getElementById('pc-cont'),inp=document.getElementById('penalty-bet');z.classList.toggle('active',this.state==='AIMING');st.style.display=this.state==='IDLE'?'block':'none';ca.style.display=this.state==='DECISION'?'block':'none';co.style.display=this.state==='DECISION'&&this.step<4?'block':'none';inp.disabled=this.state!=='IDLE';if(this.state==='DECISION'){const m=this.mults[this.step];document.getElementById('pc-cash-val').textContent=Number.isFinite(m)&&Number.isFinite(this.bet)?Math.floor(this.bet*m).toLocaleString('pt-BR'):'0'}},init(){if(this.initialized)return;this.initialized=true;this.canvas=document.getElementById('pc-canvas');this.ctx=this.canvas.getContext('2d');this.resetField();document.getElementById('pc-rules').onclick=()=>this.toggleRules();document.getElementById('pc-sound').onclick=()=>{AudioSys.init();AudioSys.toggle()};document.getElementById('pc-reset').onclick=()=>{if(confirm('Deseja reiniciar apenas a rodada do Penalty Clash? O saldo continua sendo o mesmo do Royal Play.')){this.state='IDLE';this.playing=false;this.step=0;this.bet=0;this.resetField();this.hidePopup();this.updateUI()}};this.loop();this.updateUI()},draw(){const c=this.ctx,w=800,h=500;c.clearRect(0,0,w,h);let g=c.createLinearGradient(0,0,0,300);g.addColorStop(0,'#060a12');g.addColorStop(1,'#111b33');c.fillStyle=g;c.fillRect(0,0,w,h);c.fillStyle='#166534';c.fillRect(0,260,w,240);c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=3;c.strokeRect(100,260,600,200);c.strokeStyle='#fff';c.lineWidth=8;c.beginPath();c.moveTo(180,270);c.lineTo(180,100);c.lineTo(620,100);c.lineTo(620,270);c.stroke();c.strokeStyle='rgba(255,255,255,.2)';c.lineWidth=1;for(let x=180;x<=620;x+=15){c.beginPath();c.moveTo(x,100);c.lineTo(x+(x-400)*.1,270);c.stroke()}for(let y=100;y<=270;y+=12){c.beginPath();c.moveTo(180,y);c.lineTo(620,y);c.stroke()}this.drawMan(this.gk.x,this.gk.y,'#eab308');this.drawMan(this.kicker.x,this.kicker.y,'#2563eb');c.fillStyle='#fff';c.beginPath();c.arc(this.ball.x,this.ball.y,this.ball.r,0,Math.PI*2);c.fill();c.fillStyle='#111';c.beginPath();c.arc(this.ball.x,this.ball.y,this.ball.r*.4,0,Math.PI*2);c.fill()},drawMan(x,y,col){const c=this.ctx;c.fillStyle=col;c.fillRect(x-14,y-25,28,40);c.fillStyle='#fca5a5';c.beginPath();c.arc(x,y-35,10,0,Math.PI*2);c.fill();c.strokeStyle='#1e293b';c.lineWidth=6;c.beginPath();c.moveTo(x-10,y+15);c.lineTo(x-10,y+40);c.moveTo(x+10,y+15);c.lineTo(x+10,y+40);c.stroke()},loop(){if(this.state==='ANIMATING'){if(this.phase==='RUN'){this.progress+=.05;this.kicker.x=330+(380-330)*this.progress;if(this.progress>=1){this.phase='FLIGHT';this.progress=0;AudioSys.play('tick')}}else if(this.phase==='FLIGHT'){this.progress+=.06;this.ball.x=400+(this.ball.tx-400)*this.progress;this.ball.y=420+(this.ball.ty-420)*this.progress;this.ball.r=14-6*this.progress;this.gk.x=400+(this.gk.tx-400)*this.progress;this.gk.y=200+(this.gk.ty-200)*this.progress;if(this.progress>=1){this.resolve()}}}this.draw();requestAnimationFrame(()=>this.loop())}};
 
-const Crash={state:'idle',mult:1,bet:0,loop:null,crashPoint:0,startTime:0,hasCashedOut:false,historyData:JSON.parse(localStorage.getItem('rp_crash_history')||'[]'),initIdleState(){if(this.state==='idle'||this.state==='crashed'){this.resetBtn();document.getElementById('crash-msg').innerText='Aguardando aposta...';document.getElementById('crash-mult').classList.remove('crashed');document.getElementById('crash-mult').innerText='1.00x';document.getElementById('crash-plane').style.transform='translate(0,0)'}},toggleBet(){AudioSys.init();if(this.state==='flying'&&!this.hasCashedOut)return this.cashOut();if(this.state==='idle'){const b=parseFloat(document.getElementById('crash-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.hasCashedOut=false;Sys.updateBalance(-b);this.startFlight()}},startFlight(){this.state='flying';this.mult=1;this.startTime=performance.now();document.getElementById('crash-msg').innerText='Avião decolou!';const r=Math.random();this.crashPoint=r<.03?1:Math.max(1.05,.98/r);const btn=document.getElementById('crash-btn-bet'),m=document.getElementById('crash-mult'),plane=document.getElementById('crash-plane');btn.className='btn btn-success';const tick=(now)=>{if(this.state!=='flying')return;const t=now-this.startTime;this.mult=Math.exp(t/5000);if(this.mult>=this.crashPoint){this.mult=this.crashPoint;this.crash();return}m.innerText=this.mult.toFixed(2)+'x';plane.style.transform=`translate(${Math.min(320,t/15)}px,-${Math.min(220,t/22)}px)`;btn.innerText=`PARAR / COLETAR ${(this.bet*this.mult).toFixed(2)}`;this.loop=requestAnimationFrame(tick)};this.loop=requestAnimationFrame(tick)},cashOut(){if(this.hasCashedOut||this.state!=='flying')return;this.hasCashedOut=true;const p=this.bet*this.mult;Sys.updateBalance(p);Sys.addHistory('Sky Crash',this.bet,this.mult.toFixed(2)+'x',p,'Parou/Coletou');document.getElementById('crash-msg').innerHTML=`<span class="text-success">Lucro coletado: ${p.toFixed(2)} moedas!</span>`;AudioSys.play('win');this.state='idle';cancelAnimationFrame(this.loop);this.resetBtn()},crash(){this.state='crashed';cancelAnimationFrame(this.loop);const m=document.getElementById('crash-mult');m.innerText=this.mult.toFixed(2)+'x';m.classList.add('crashed');document.getElementById('crash-msg').innerHTML='<span class="text-danger">CRASH! O avião caiu.</span>';if(!this.hasCashedOut)Sys.addHistory('Sky Crash',this.bet,'0.00x',0,'Crash');this.historyData.unshift(this.mult);this.historyData=this.historyData.slice(0,10);localStorage.setItem('rp_crash_history',JSON.stringify(this.historyData));this.renderHistoryStrip();this.resetBtn();setTimeout(()=>{this.state='idle';this.initIdleState()},1800)},resetBtn(){const b=document.getElementById('crash-btn-bet');b.className='btn btn-gold';b.innerText='APOSTAR'},renderHistoryStrip(){const s=document.getElementById('crash-history-strip');if(!s)return;s.innerHTML='';this.historyData.forEach(m=>{const e=document.createElement('div');e.className='crash-hist-badge '+(m>=2?'high':'low');e.innerText=m.toFixed(2)+'x';s.appendChild(e)})}};
+const Crash={state:'idle',mult:1,bet:0,loop:null,crashPoint:0,startTime:0,hasCashedOut:false,historyData:[],initIdleState(){if(this.state==='idle'||this.state==='crashed'){this.resetBtn();document.getElementById('crash-msg').innerText='Aguardando aposta...';document.getElementById('crash-mult').classList.remove('crashed');document.getElementById('crash-mult').innerText='1.00x';document.getElementById('crash-plane').style.transform='translate(0,0)'}},toggleBet(){AudioSys.init();if(this.state==='flying'&&!this.hasCashedOut)return this.cashOut();if(this.state==='idle'){const b=parseFloat(document.getElementById('crash-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.hasCashedOut=false;Sys.updateBalance(-b);this.startFlight()}},startFlight(){this.state='flying';this.mult=1;this.startTime=performance.now();document.getElementById('crash-msg').innerText='Avião decolou!';const r=Math.random();this.crashPoint=r<.03?1:Math.max(1.05,.98/r);const btn=document.getElementById('crash-btn-bet'),m=document.getElementById('crash-mult'),plane=document.getElementById('crash-plane');btn.className='btn btn-success';const tick=(now)=>{if(this.state!=='flying')return;const t=now-this.startTime;this.mult=Math.exp(t/5000);if(this.mult>=this.crashPoint){this.mult=this.crashPoint;this.crash();return}m.innerText=this.mult.toFixed(2)+'x';plane.style.transform=`translate(${Math.min(320,t/15)}px,-${Math.min(220,t/22)}px)`;btn.innerText=`PARAR / COLETAR ${(this.bet*this.mult).toFixed(2)}`;this.loop=requestAnimationFrame(tick)};this.loop=requestAnimationFrame(tick)},cashOut(){if(this.hasCashedOut||this.state!=='flying')return;this.hasCashedOut=true;const p=this.bet*this.mult;Sys.updateBalance(p);Sys.addHistory('Sky Crash',this.bet,this.mult.toFixed(2)+'x',p,'Parou/Coletou');document.getElementById('crash-msg').innerHTML=`<span class="text-success">Lucro coletado: ${p.toFixed(2)} moedas!</span>`;AudioSys.play('win');this.state='idle';cancelAnimationFrame(this.loop);this.resetBtn()},crash(){this.state='crashed';cancelAnimationFrame(this.loop);const m=document.getElementById('crash-mult');m.innerText=this.mult.toFixed(2)+'x';m.classList.add('crashed');document.getElementById('crash-msg').innerHTML='<span class="text-danger">CRASH! O avião caiu.</span>';if(!this.hasCashedOut)Sys.addHistory('Sky Crash',this.bet,'0.00x',0,'Crash');this.historyData.unshift(this.mult);this.historyData=this.historyData.slice(0,10);this.renderHistoryStrip();this.resetBtn();setTimeout(()=>{this.state='idle';this.initIdleState()},1800)},resetBtn(){const b=document.getElementById('crash-btn-bet');b.className='btn btn-gold';b.innerText='APOSTAR'},renderHistoryStrip(){const s=document.getElementById('crash-history-strip');if(!s)return;s.innerHTML='';this.historyData.forEach(m=>{const e=document.createElement('div');e.className='crash-hist-badge '+(m>=2?'high':'low');e.innerText=m.toFixed(2)+'x';s.appendChild(e)})}};
 
 window.addEventListener('load',()=>{Sys.updateBalance(0);Mines.initUI();Slots.initUI();Penalty.init();Crash.renderHistoryStrip();UI.nav('home')});
 
@@ -371,7 +392,7 @@ async function checkAuth() {
         if (recoveringPassword) {
             Auth.showRecovery();
         } else if (!error && data.session) {
-            Auth.showApp();
+            await Auth.showApp();
         } else {
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('app').classList.add('hidden');
@@ -381,6 +402,10 @@ async function checkAuth() {
     }
 }
 checkAuth();
+window.addEventListener('focus',async()=>{
+ if(!Sys.ready||Sys.pending||Mines.playing||Slots.spinning||Penalty.playing||Crash.state==='flying')return;
+ try{const {data,error}=await supabaseClient.rpc('royal_get_profile');if(!error&&data){Sys.balance=Number(data.balance);Sys.renderBalance()}}catch(e){console.warn('Sincronização adiada',e)}
+});
     
 </script>
 </body>
