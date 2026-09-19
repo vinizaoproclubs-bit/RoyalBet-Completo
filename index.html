@@ -129,10 +129,21 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
             CRIAR CONTA
         </button>
 
-        <p id="auth-message"></p>
+        <button type="button" onclick="Auth.forgotPassword()">ESQUECI MINHA SENHA</button>
+        <p id="auth-message" role="status" aria-live="polite"></p>
 
     </div>
 
+</div>
+<div id="recovery-screen" class="auth-screen hidden">
+  <div class="auth-box">
+    <h1>CRIAR NOVA SENHA</h1>
+    <p>Digite sua nova senha para recuperar a conta.</p>
+    <input id="recovery-password" type="password" autocomplete="new-password" minlength="6" placeholder="Nova senha (mínimo 6 caracteres)">
+    <input id="recovery-confirm" type="password" autocomplete="new-password" minlength="6" placeholder="Confirme a nova senha">
+    <button type="button" id="recovery-submit" onclick="Auth.saveNewPassword()">SALVAR NOVA SENHA</button>
+    <p id="recovery-message" role="status" aria-live="polite"></p>
+  </div>
 </div>
 <div id="app" class="hidden">
 <div class="demo-banner">🎰 ROYAL PLAY MODO DEMONSTRAÇÃO — CRÉDITOS SEM VALOR REAL 🎰</div>
@@ -274,6 +285,47 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         this.showApp();
     },
 
+    async forgotPassword() {
+        const email = document.getElementById('auth-email').value.trim();
+        if (!email) { this.message('Digite seu e-mail primeiro.'); return; }
+        this.message('Solicitando recuperação...');
+        try {
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://vinizaoproclubs-bit.github.io/RoyalBet-Completo/index.html'
+            });
+            if (error) { this.message('Não foi possível enviar agora. Aguarde e tente novamente.'); return; }
+            this.message('Se o e-mail puder receber mensagens de recuperação, você receberá um link. Confira também o spam.');
+        } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
+    },
+
+    showRecovery() {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('recovery-screen').classList.remove('hidden');
+    },
+
+    async saveNewPassword() {
+        const password = document.getElementById('recovery-password').value;
+        const confirmation = document.getElementById('recovery-confirm').value;
+        const message = document.getElementById('recovery-message');
+        const button = document.getElementById('recovery-submit');
+        if (password.length < 6) { message.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
+        if (password !== confirmation) { message.textContent = 'As senhas não são iguais.'; return; }
+        button.disabled = true;
+        message.textContent = 'Salvando nova senha...';
+        try {
+            const { error } = await supabaseClient.auth.updateUser({ password });
+            if (error) { message.textContent = 'Não foi possível alterar a senha. Solicite um novo link se ele expirou.'; return; }
+            message.textContent = 'Senha alterada! Voltando para a tela de login...';
+            await supabaseClient.auth.signOut();
+            history.replaceState(null, '', location.pathname + location.search);
+            document.getElementById('recovery-screen').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            this.message('Senha alterada. Entre com sua nova senha.');
+        } catch (e) { message.textContent = 'Falha de conexão. Tente novamente.'; }
+        finally { button.disabled = false; }
+    },
+
     async logout() {
         await supabaseClient.auth.signOut();
         location.reload();
@@ -304,18 +356,30 @@ const Crash={state:'idle',mult:1,bet:0,loop:null,crashPoint:0,startTime:0,hasCas
 
 window.addEventListener('load',()=>{Sys.updateBalance(0);Mines.initUI();Slots.initUI();Penalty.init();Crash.renderHistoryStrip();UI.nav('home')});
 
-    async function checkAuth() {
+// Links de recuperação criam uma sessão temporária: não abrir o jogo antes de trocar a senha.
+let recoveringPassword = /(?:[?#&])type=recovery(?:&|$)/.test(location.href);
+supabaseClient.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+        recoveringPassword = true;
+        Auth.showRecovery();
+    }
+});
 
-    const { data } = await supabaseClient.auth.getSession();
-
-    if (data.session) {
-        Auth.showApp();
-    } else {
-        document.getElementById("auth-screen").classList.remove("hidden");
-        document.getElementById("app").classList.add("hidden");
+async function checkAuth() {
+    try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (recoveringPassword) {
+            Auth.showRecovery();
+        } else if (!error && data.session) {
+            Auth.showApp();
+        } else {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+        }
+    } catch (e) {
+        Auth.message('Não foi possível verificar a sessão. Atualize a página.');
     }
 }
-
 checkAuth();
     
 </script>
