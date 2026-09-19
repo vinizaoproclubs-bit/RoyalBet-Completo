@@ -1,19 +1,3 @@
-<div id="auth-screen" class="auth-screen">
-    <div class="auth-box">
-        <h1>ROYAL PLAY</h1>
-        <p>Entre na sua conta</p>
-
-        <input id="auth-email" type="email" placeholder="E-mail">
-
-        <input id="auth-password" type="password" placeholder="Senha">
-
-        <button onclick="Auth.login()">ENTRAR</button>
-
-        <button onclick="Auth.register()">CRIAR CONTA</button>
-
-        <p id="auth-message"></p>
-    </div>
-</div>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -41,9 +25,115 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(5px);display:flex;justify-content:center;align-items:center;z-index:9999}.modal-content{width:90%;max-width:400px;padding:30px;text-align:center;position:relative}.modal-close{position:absolute;top:15px;right:15px;cursor:pointer;font-size:20px;color:var(--text-muted)}.coin-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
 .history-table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px}.history-table th,.history-table td{padding:12px;text-align:left;border-bottom:1px solid var(--glass-border)}.history-table th{color:var(--text-muted);font-size:12px}.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.help-card{padding:20px;background:rgba(0,0,0,.3);border-radius:12px;border:1px solid var(--glass-border)}.help-card h3{color:var(--accent);margin-bottom:10px}
 @media(max-width:768px){.game-container{flex-direction:column-reverse;height:auto;max-height:none}.game-sidebar{width:100%;border-top:1px solid var(--glass-border);border-radius:0 0 16px 16px}.game-area{border-radius:16px 16px 0 0;min-height:350px}nav{position:fixed;bottom:0;left:0;right:0;z-index:990;background:rgba(9,9,14,.95);border-top:1px solid var(--glass-border);border-bottom:0;padding:10px;gap:5px;justify-content:space-around}.nav-item{flex-direction:column;font-size:10px;padding:5px;gap:4px}main{padding-bottom:80px}.help-grid{grid-template-columns:1fr}.crash-multiplier{font-size:60px}header{flex-direction:column;gap:10px}.balance-container{width:100%;justify-content:center;flex-wrap:wrap}}
+
+    .auth-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #080808;
+    padding: 20px;
+}
+
+.auth-screen.hidden {
+    display: none !important;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 400px;
+
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 20px;
+
+    padding: 30px;
+
+    text-align: center;
+}
+
+.auth-box h1 {
+    margin-bottom: 10px;
+}
+
+.auth-box input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 14px;
+    margin-top: 12px;
+
+    border-radius: 10px;
+    border: 1px solid #444;
+
+    background: #1b1b1b;
+    color: white;
+}
+
+.auth-box button {
+    width: 100%;
+
+    padding: 14px;
+    margin-top: 12px;
+
+    border: none;
+    border-radius: 10px;
+
+    cursor: pointer;
+}
+
+.auth-box p {
+    color: #aaa;
+}
+
+#auth-message {
+    margin-top: 15px;
+}
+
+#app.hidden {
+    display: none !important;
+}
+    
 </style>
 </head>
 <body>
+    <div id="auth-screen" class="auth-screen">
+
+    <div class="auth-box">
+
+        <h1>ROYAL PLAY</h1>
+
+        <p>Entre ou crie sua conta</p>
+
+        <input
+            id="auth-email"
+            type="email"
+            placeholder="E-mail"
+        >
+
+        <input
+            id="auth-password"
+            type="password"
+            placeholder="Senha"
+        >
+
+        <button onclick="Auth.login()">
+            ENTRAR
+        </button>
+
+        <button onclick="Auth.register()">
+            CRIAR CONTA
+        </button>
+
+        <p id="auth-message"></p>
+
+    </div>
+
+</div>
 <div class="demo-banner">🎰 ROYAL PLAY MODO DEMONSTRAÇÃO — CRÉDITOS SEM VALOR REAL 🎰</div>
 <header>
 <div class="logo">ROYAL PLAY<span>CASSINO VIRTUAL</span></div>
@@ -214,6 +304,21 @@ const Penalty={state:'IDLE',playing:false,initialized:false,bet:0,step:0,mults:[
 const Crash={state:'idle',mult:1,bet:0,loop:null,crashPoint:0,startTime:0,hasCashedOut:false,historyData:JSON.parse(localStorage.getItem('rp_crash_history')||'[]'),initIdleState(){if(this.state==='idle'||this.state==='crashed'){this.resetBtn();document.getElementById('crash-msg').innerText='Aguardando aposta...';document.getElementById('crash-mult').classList.remove('crashed');document.getElementById('crash-mult').innerText='1.00x';document.getElementById('crash-plane').style.transform='translate(0,0)'}},toggleBet(){AudioSys.init();if(this.state==='flying'&&!this.hasCashedOut)return this.cashOut();if(this.state==='idle'){const b=parseFloat(document.getElementById('crash-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.hasCashedOut=false;Sys.updateBalance(-b);this.startFlight()}},startFlight(){this.state='flying';this.mult=1;this.startTime=performance.now();document.getElementById('crash-msg').innerText='Avião decolou!';const r=Math.random();this.crashPoint=r<.03?1:Math.max(1.05,.98/r);const btn=document.getElementById('crash-btn-bet'),m=document.getElementById('crash-mult'),plane=document.getElementById('crash-plane');btn.className='btn btn-success';const tick=(now)=>{if(this.state!=='flying')return;const t=now-this.startTime;this.mult=Math.exp(t/5000);if(this.mult>=this.crashPoint){this.mult=this.crashPoint;this.crash();return}m.innerText=this.mult.toFixed(2)+'x';plane.style.transform=`translate(${Math.min(320,t/15)}px,-${Math.min(220,t/22)}px)`;btn.innerText=`PARAR / COLETAR ${(this.bet*this.mult).toFixed(2)}`;this.loop=requestAnimationFrame(tick)};this.loop=requestAnimationFrame(tick)},cashOut(){if(this.hasCashedOut||this.state!=='flying')return;this.hasCashedOut=true;const p=this.bet*this.mult;Sys.updateBalance(p);Sys.addHistory('Sky Crash',this.bet,this.mult.toFixed(2)+'x',p,'Parou/Coletou');document.getElementById('crash-msg').innerHTML=`<span class="text-success">Lucro coletado: ${p.toFixed(2)} moedas!</span>`;AudioSys.play('win');this.state='idle';cancelAnimationFrame(this.loop);this.resetBtn()},crash(){this.state='crashed';cancelAnimationFrame(this.loop);const m=document.getElementById('crash-mult');m.innerText=this.mult.toFixed(2)+'x';m.classList.add('crashed');document.getElementById('crash-msg').innerHTML='<span class="text-danger">CRASH! O avião caiu.</span>';if(!this.hasCashedOut)Sys.addHistory('Sky Crash',this.bet,'0.00x',0,'Crash');this.historyData.unshift(this.mult);this.historyData=this.historyData.slice(0,10);localStorage.setItem('rp_crash_history',JSON.stringify(this.historyData));this.renderHistoryStrip();this.resetBtn();setTimeout(()=>{this.state='idle';this.initIdleState()},1800)},resetBtn(){const b=document.getElementById('crash-btn-bet');b.className='btn btn-gold';b.innerText='APOSTAR'},renderHistoryStrip(){const s=document.getElementById('crash-history-strip');if(!s)return;s.innerHTML='';this.historyData.forEach(m=>{const e=document.createElement('div');e.className='crash-hist-badge '+(m>=2?'high':'low');e.innerText=m.toFixed(2)+'x';s.appendChild(e)})}};
 
 window.addEventListener('load',()=>{Sys.updateBalance(0);Mines.initUI();Slots.initUI();Penalty.init();Crash.renderHistoryStrip();UI.nav('home')});
+
+    async function checkAuth() {
+
+    const { data } = await supabase.auth.getSession();
+
+    if (data.session) {
+        Auth.showApp();
+    } else {
+        document.getElementById("auth-screen").classList.remove("hidden");
+        document.getElementById("app").classList.add("hidden");
+    }
+}
+
+checkAuth();
+    
 </script>
 </body>
 </html>
