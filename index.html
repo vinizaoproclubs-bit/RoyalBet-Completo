@@ -219,7 +219,7 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
   const SUPABASE_URL = "https://egerudplakshmjpcvvws.supabase.co";
 const SUPABASE_KEY = "sb_publishable_3jlJ296WNi59RcUEsm4WBA_4lz_HiQU";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const Auth = {
 
@@ -237,7 +237,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { error } = await supabaseClient.auth.signUp({
             email: email,
             password: password
         });
@@ -259,7 +259,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             return;
         }
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -273,7 +273,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     },
 
     async logout() {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         location.reload();
     },
 
@@ -304,7 +304,7 @@ window.addEventListener('load',()=>{Sys.updateBalance(0);Mines.initUI();Slots.in
 
     async function checkAuth() {
 
-    const { data } = await supabase.auth.getSession();
+    const { data } = await supabaseClient.auth.getSession();
 
     if (data.session) {
         Auth.showApp();
