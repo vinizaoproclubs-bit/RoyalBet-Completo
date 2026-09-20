@@ -73,7 +73,7 @@ button{touch-action:manipulation}
 <header>
   <div class="top">
     <div class="logo">⚽ Bet<span>Fut</span></div>
-    <a href="index.html" class="btn home" style="text-decoration:none">← RoyalBet</a>
+    <a href="index.html" target="_top" class="btn home" style="text-decoration:none">← RoyalBet</a>
     <span class="tag">SIMULADOR · SEM APOSTAS</span>
     <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
       <button id="homeBtnTop" class="btn home" onclick="goHome()">⌂ Ligas</button>
@@ -338,6 +338,7 @@ async function loadRoyalBalance(){
   }
 }
 window.addEventListener('focus',loadRoyalBalance);
+window.addEventListener('message',event=>{if(event.origin===location.origin&&event.data==='royalbet-refresh-balance')loadRoyalBalance();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadRoyalBalance();});
 
 function renderHome(){
@@ -761,7 +762,6 @@ function resetGame(){
   loadRoyalBalance(); // Reconsulta, sem zerar ou modificar a conta.
   renderSlip();
   closeModal();
-  closeLiveModal();
   document.getElementById('leagueView').style.display='none';
   document.getElementById('homeScreen').style.display='block';
   document.getElementById('homeBtnTop').style.display='none';
