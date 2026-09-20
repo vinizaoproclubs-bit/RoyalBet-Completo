@@ -1,5 +1,759 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BetFut — Simulador de ligas</title><style>*{box-sizing:border-box}body{margin:0;background:#0b1220;color:#f5f7fb;font-family:Arial,sans-serif}header{background:#121c2d;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}a,button{background:#263e61;color:white;border:1px solid #486084;padding:11px 15px;border-radius:10px;text-decoration:none;cursor:pointer}main{max-width:900px;margin:auto;padding:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card{background:#18253a;border:1px solid #2a3952;border-radius:14px;padding:18px;margin:12px 0}.card button{margin-top:10px}h1{font-size:26px}.muted{color:#a9b9ce}.score{font-size:23px;color:#20d889;font-weight:bold}select{padding:10px;background:#101d31;color:white;border:1px solid #486084;border-radius:8px}</style></head><body><header><b>⚽ BetFut • Ligas</b><a href="index.html">← Voltar ao RoyalBet</a></header><main><h1>Simulador de futebol</h1><p class="muted">Escolha uma liga, dê seu palpite e simule partidas. Sem apostas, débitos ou prêmios. Seu saldo do RoyalBet não é alterado.</p><div id="leagues" class="grid"></div><section id="matches"></section></main><script>
-const leagues=[['🇧🇷 Brasileirão',['Palmeiras','Flamengo','Corinthians','São Paulo','Santos','Fluminense','Botafogo','Grêmio']],['🏴 Premier League',['Arsenal','Liverpool','Manchester City','Chelsea','Manchester United','Tottenham','Newcastle','Aston Villa']],['🇪🇸 La Liga',['Real Madrid','Barcelona','Atlético de Madrid','Sevilla','Valencia','Villarreal','Real Sociedad','Athletic Bilbao']],['🇮🇹 Serie A',['Inter','Milan','Juventus','Napoli','Roma','Lazio','Atalanta','Fiorentina']],['🇩🇪 Bundesliga',['Bayern de Munique','Borussia Dortmund','Bayer Leverkusen','RB Leipzig','Stuttgart','Frankfurt','Wolfsburg','Werder Bremen']]];
-const root=document.getElementById('leagues'),matches=document.getElementById('matches');leagues.forEach((l,i)=>{const b=document.createElement('button');b.textContent=l[0];b.onclick=()=>show(i);root.appendChild(b)});
-function show(i){const l=leagues[i],teams=l[1];matches.innerHTML='';const title=document.createElement('h2');title.textContent=l[0]+' — Rodada simulada';matches.appendChild(title);for(let n=0;n<4;n++){const a=teams[n],b=teams[7-n],c=document.createElement('article');c.className='card';const heading=document.createElement('h3');heading.textContent=a+' × '+b;c.appendChild(heading);const label=document.createElement('label');label.textContent='Seu palpite: ';const select=document.createElement('select');['Selecione','Vitória '+a,'Empate','Vitória '+b].forEach((t,j)=>{let o=document.createElement('option');o.value=j;o.textContent=t;select.appendChild(o)});label.appendChild(select);c.appendChild(label);const result=document.createElement('p');result.className='score';const btn=document.createElement('button');btn.textContent='Simular partida';btn.onclick=()=>{const x=Math.floor(Math.random()*5),y=Math.floor(Math.random()*5);result.textContent=a+' '+x+' × '+y+' '+b+(select.value==='0'?'':(' • Palpite '+(Number(select.value)===(x>y?1:x===y?2:3)?'acertado!':'não acertado.')));btn.disabled=true};c.append(btn,result);matches.appendChild(c)}}
-</script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetFut - Simulador de Futebol</title>
+<style>
+:root{--bg:#0b1220;--card:#121c2d;--card2:#18253a;--line:#2a3952;--text:#f5f7fb;--muted:#9eacc2;--green:#20d889;--blue:#4c8dff;--red:#ff5d6c;--yellow:#ffc857}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#08101c,#101d31);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+button,input{font:inherit}button{cursor:pointer}
+header{position:sticky;top:0;z-index:5;background:#0b1424ee;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{max-width:1100px;margin:auto;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{font-size:25px;font-weight:900}.logo span{color:var(--green)}.tag{font-size:12px;padding:6px 10px;border-radius:20px;background:#20334d;color:#b9c9e1}
+.balance{background:#152b28;border:1px solid #275844;border-radius:12px;padding:10px 14px}.balance small{display:block;color:#9bbcae;font-size:11px}.balance strong{color:var(--green);font-size:20px}
+main{max-width:1100px;margin:auto;padding:22px 16px 50px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:20px}.hero h1{margin:0 0 8px;font-size:clamp(24px,5vw,36px)}.hero p{margin:0;color:var(--muted);line-height:1.5}
+.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:18px;align-items:start}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:16px;box-shadow:0 10px 30px #0002}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.sectionhead h2{font-size:18px;margin:0}.muted{color:var(--muted);font-size:13px}
+.games{display:grid;gap:10px}.game{background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:14px;transition:.15s}.game:hover{border-color:var(--blue);transform:translateY(-1px)}
+.game-top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-bottom:12px}.teams{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800}.teams span:nth-child(2){color:var(--muted);font-size:12px}.game-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px}.btn{border:1px solid var(--line);background:#1b2b43;color:var(--text);border-radius:9px;padding:9px 12px;font-weight:700;font-size:12px}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.green{background:#168b59;border-color:#168b59;color:white}.btn:disabled{opacity:.4;cursor:not-allowed}
+.slip{position:sticky;top:92px}.slip h2{margin:0}.empty{padding:20px 0;text-align:center;color:var(--muted);font-size:13px}.pick{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}.pick strong{white-space:nowrap}.remove{background:none;border:0;color:var(--red);font-size:17px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0}.field{width:120px;background:#0c1727;border:1px solid var(--line);color:white;padding:10px;border-radius:9px;text-align:right}.total{font-size:18px;font-weight:900;color:var(--green)}
+.modal{position:fixed;inset:0;background:#020611cc;z-index:10;display:flex;align-items:flex-start;justify-content:center;padding:14px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.modal.hidden{display:none}.modalbox{max-width:650px;width:100%;max-height:none;min-height:0;overflow:visible;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin:0 auto 20px}.modalhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.close{background:none;border:0;color:white;font-size:25px}.market{margin-top:16px}.market h3{font-size:14px;margin:0 0 10px}.odds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.odd{background:#17263b;border:1px solid var(--line);border-radius:9px;padding:10px 7px;color:white;text-align:left}.odd small{display:block;color:#a9b9ce;font-size:11px}.odd b{display:block;margin-top:4px;color:var(--green)}.odd.selected{border:2px solid var(--green);background:#153b31;padding:9px 6px}
+.live{text-align:center}.scoreline{display:flex;justify-content:space-around;align-items:center;gap:15px;margin:20px 0}.score{font-size:48px;font-weight:900}.clock{font-size:32px;font-weight:900;color:var(--yellow)}.progress{height:7px;background:#26354b;border-radius:20px;overflow:visible}.progress div{height:100%;background:var(--green);width:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}.stat{background:var(--card2);border-radius:10px;padding:12px}.stat b{font-size:20px;display:block}.events{text-align:left;margin-top:15px}.event{padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}.result{padding:12px;border-radius:10px;background:#18352b;color:#aef3d0;margin-top:15px}
+.tabs{display:flex;gap:10px;margin-bottom:15px}.tabs button{flex:1}.hidden{display:none!important}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.slip{position:static}.hero{align-items:flex-start;flex-direction:column}.odds{grid-template-columns:repeat(2,minmax(0,1fr))}.top{align-items:flex-start}.balance{margin-left:auto}}
+
+/* Correções mobile e hierarquia das odds */
+body,html{overflow-x:hidden!important;overflow-y:auto!important;touch-action:pan-y!important}
+.modal{align-items:flex-start!important;overflow-y:auto!important;touch-action:pan-y!important;padding-bottom:36px!important}
+.modalbox{width:100%;max-height:none!important;overflow:visible!important;padding-bottom:28px!important}
+#markets{display:flex;flex-direction:column;gap:12px;overflow:visible!important}
+.market{overflow:visible!important}
+.market button,.pick,.odd,.selection{min-height:58px!important}
+.market button,.pick,.selection{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;text-align:left!important}
+.market button .name,.pick .name,.selection .name,.market button span:first-child{font-size:17px!important;line-height:1.25!important;font-weight:700!important;flex:1!important;min-width:0!important}
+.market button .odd,.pick .odd,.selection .odd,.odd{font-size:21px!important;font-weight:900!important;line-height:1!important;white-space:nowrap!important;padding:10px 12px!important;border-radius:10px!important}
+#slip,#betSlip{position:relative!important;bottom:auto!important;max-height:none!important;overflow:visible!important}
+button{touch-action:manipulation}
+
+
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--card) 30%);}
+.modal-actions .btn{min-width:170px}
+.market-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.market-section{background:#0f1929;border:1px solid var(--line);border-radius:14px;padding:12px}
+.market-section h3{margin:0 0 10px;font-size:14px}
+@media(max-width:720px){.market-grid{grid-template-columns:1fr}.modal-actions{flex-direction:column}.modal-actions .btn{width:100%}}
+
+/* ===== Central de ligas ===== */
+#homeScreen{display:block}
+#leagueView{display:none}
+.home-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:18px}
+.league-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.league-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#17263b,#101a2b);border:1px solid var(--line);border-radius:18px;padding:18px;min-height:150px;transition:.16s;cursor:pointer}
+.league-card:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 14px 34px #0003}
+.league-card .emoji{font-size:34px;margin-bottom:8px}
+.league-card h3{margin:0 0 6px;font-size:20px}
+.league-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.league-card .count{position:absolute;right:14px;top:14px;background:#20334d;color:#c9d7e8;border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
+.home-note{margin-top:14px;color:var(--muted);font-size:12px;text-align:center}
+.home-note strong{color:var(--text)}
+.league-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.league-title{display:flex;align-items:center;gap:10px}
+.league-title .flag{font-size:28px}
+.league-title h1{margin:0;font-size:clamp(24px,5vw,34px)}
+.league-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn.home{background:#17263b}
+#homeBtnTop{display:none}
+@media(min-width:721px){.league-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){.home-hero{align-items:flex-start;flex-direction:column}.league-grid{grid-template-columns:1fr}.league-card{min-height:132px}.league-bar{align-items:flex-start}}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="logo">⚽ Bet<span>Fut</span></div>
+    <a href="index.html" class="btn home" style="text-decoration:none">← RoyalBet</a>
+    <span class="tag">SIMULADOR · SEM APOSTAS</span>
+    <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+      <button id="homeBtnTop" class="btn home" onclick="goHome()">⌂ Ligas</button>
+      <div class="balance" title="Saldo da mesma conta do RoyalBet; apenas consulta"><small>SALDO ROYALBET · CONSULTA</small><strong id="balance">Carregando...</strong></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="homeScreen">
+    <div class="home-hero">
+      <div>
+        <h1 style="margin:0 0 8px;font-size:clamp(26px,5vw,38px)">Escolha sua liga</h1>
+        <p class="muted" style="font-size:14px;line-height:1.5;margin:0">
+          Entre no campeonato para fazer palpites e simular partidas. O saldo exibido é o da sua conta RoyalBet.
+        </p>
+      </div>
+      <button class="btn" onclick="resetGame()">↻ Reiniciar simulação</button>
+    </div>
+    <section class="card">
+      <div class="sectionhead">
+        <h2>🌍 Campeonatos disponíveis</h2>
+        <span class="tag">5 ligas</span>
+      </div>
+      <div id="leagueGrid" class="league-grid"></div>
+      <div class="home-note">Trocar de liga não altera seu saldo. Os palpites e as simulações não debitam nem creditam moedas.</div>
+    </section>
+  </section>
+
+  <section id="leagueView">
+    <div class="league-bar">
+      <div class="league-title">
+        <span class="flag" id="leagueFlag">🌍</span>
+        <div>
+          <h1 id="leagueName">Liga</h1>
+          <div class="muted" id="leagueSubtitle">Rodada virtual</div>
+        </div>
+      </div>
+      <div class="league-actions">
+        <button class="btn home" onclick="goHome()">← Voltar para ligas</button>
+        <button class="btn" onclick="resetGame()">↻ Reiniciar simulação</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="sectionhead">
+          <h2 id="gamesTitle">⚽ Partidas</h2>
+          <span class="tag">Rodada virtual</span>
+        </div>
+        <div id="games" class="games"></div>
+      </section>
+
+      <aside class="card slip">
+        <div class="sectionhead">
+          <h2>🎫 Seus palpites</h2>
+          <span class="tag" id="count">0 seleções</span>
+        </div>
+        <div id="picks"><div class="empty">Selecione opções de uma partida para começar.</div></div>
+        <button id="closeBet" class="btn primary" style="width:100%" disabled onclick="closeBet()">▶ Simular palpites</button>
+        <p id="message" class="muted">Simulação recreativa: nenhum crédito será debitado ou concedido.</p>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<div id="marketModal" class="modal hidden">
+  <div class="modalbox">
+    <div class="modalhead">
+      <div><h2 id="marketTitle" style="margin:0"></h2><p class="muted">Selecione suas previsões para a simulação.</p></div>
+      <button class="close" onclick="closeModal()">×</button>
+    </div>
+    <div id="markets"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Continuar escolhendo</button>
+      <button id="startFromModal" class="btn green" disabled onclick="startBetFromModal()">▶ Começar simulação</button>
+    </div>
+  </div>
+</div>
+
+<div id="liveModal" class="modal hidden">
+  <div class="modalbox live">
+    <div class="modalhead">
+      <h2>🏟️ Simulação ao vivo</h2>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="tag" id="liveStatus">AO VIVO</span>
+        <button class="close" onclick="closeLiveModal()" aria-label="Sair da partida">×</button>
+      </div>
+    </div>
+    <p id="liveTeams" class="muted"></p>
+    <div class="clock" id="clock">00:00</div>
+    <div class="progress"><div id="progress"></div></div>
+    <div class="scoreline">
+      <div><b id="lh"></b><div class="score" id="sh">0</div></div>
+      <div style="font-size:24px;color:var(--muted)">×</div>
+      <div><b id="la"></b><div class="score" id="sa">0</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat">🚩<b id="corners">0</b><small>Escanteios</small></div>
+      <div class="stat">🟨<b id="cards">0</b><small>Cartões</small></div>
+      <div class="stat">⚽<b id="goals">0</b><small>Gols</small></div>
+    </div>
+    <div class="events"><h3 style="text-align:left">Lances da partida</h3><div id="events" class="muted">Apito inicial!</div></div>
+    <div id="final"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* =========================
+   DADOS DAS LIGAS
+   ========================= */
+const brasilTeams=[['Flamengo','Santos'],['Palmeiras','Corinthians'],['São Paulo','Grêmio'],['Fluminense','Botafogo'],['Vasco','Internacional'],['Atlético-MG','Cruzeiro'],['Bahia','Fortaleza'],['Athletico-PR','Coritiba'],['Bragantino','Sport'],['Ceará','Vitória'],['Juventude','Goiás'],['Grêmio','Bahia'],['Santos','São Paulo'],['Corinthians','Fluminense'],['Botafogo','Palmeiras']];
+const brasilPlayers=[
+['Pedro','Bruno Henrique','De Arrascaeta','Luiz Araújo','Soteldo','Neymar Jr','Barreal','Thaciano'],
+['Vitor Roque','Paulinho','Jhon Arias','Andreas Pereira','Yuri Alberto','Rodrigo Garro','Kaio César','Raniele'],
+['Lucas Moura','Calleri','Luciano','Oscar','Braithwaite','Tetê','Amuzu','Carlos Vinícius'],
+['Germán Cano','Soteldo','Kevin Serna','Agustín Canobbio','Arthur Cabral','Alex Telles','Matheus Martins','Lucas Villalba'],
+['Vegetti','Payet','Rayan','Coutinho','Alan Patrick','Borré','Enner Valencia','Bruno Henrique'],
+['Hulk','Bernard','Reinier','Tomás Cuello','Kaio Jorge','Matheus Pereira','Christian','Sinisterra'],
+['Everton Ribeiro','Erick Pulga','Rodrigo Nestor','Alejo Véliz','Luciano Juba','Mastriani','Pochettino','Marinho'],
+['Mastriani','Cuello','Zapelli','Erick','Canobbio','Soteldo','Kevin Serna','Agustín Canobbio'],
+['Eduardo Sasha','Helinho','Vitinho','Fernando','Pedro Henrique','Eric Ramires','Juninho Capixaba','Isidro Pita'],
+['Erick Pulga','Saulo Mineiro','Lourenço','Mugni','Matheuzinho','Osvaldo','Renato Kayzer','Lucas Esteves'],
+['Gilberto','Lucas Barbosa','Nenê','Erick','Thiago Galhardo','Matheus Bianqui','Robson','Júnior Brumado'],
+['Braithwaite','Tetê','Amuzu','Carlos Vinícius','Guilherme','Soteldo','Giuliano','Rincón'],
+['Guilherme','Soteldo','Giuliano','Rincón','Yuri Alberto','Rodrigo Garro','Memphis','Kaio César'],
+['Yuri Alberto','Rodrigo Garro','Memphis','Kaio César','Germán Cano','Kevin Serna','Soteldo','Agustín Canobbio'],
+['Arthur Cabral','Matheus Martins','Lucas Villalba','Júnior Santos','Vitor Roque','Jhon Arias','Paulinho','Ramón Sosa']
+];
+
+const leagueSeed={
+  premier:{
+    name:'Premier League',flag:'🏴',subtitle:'Inglaterra • Rodada virtual',
+    games:[
+      ['Arsenal','Chelsea'],['Liverpool','Manchester City'],['Manchester United','Tottenham'],['Newcastle','Aston Villa'],
+      ['Brighton','West Ham'],['Everton','Crystal Palace'],['AFC Bournemouth','Fulham'],['Brentford','Nottingham Forest'],
+      ['Wolverhampton','Leeds'],['Aston Villa','Liverpool']
+    ],
+    players:[
+      ['Saka','Havertz','Ødegaard','Martinelli','Palmer','Jackson','Rice','Caicedo'],
+      ['Salah','Luis Díaz','Núñez','Haaland','Foden','De Bruyne','Szoboszlai','Grealish'],
+      ['Bruno Fernandes','Rashford','Højlund','Son','Kulusevski','Brennan Johnson','Mainoo','Maddison'],
+      ['Isak','Gordon','Watkins','Tielemans','Anthony Gordon','Bailey','Rogers','Joelinton'],
+      ['Mitoma','Welbeck','Mbeumo','Paquetá','Bowen','João Pedro','Gross','Kudus'],
+      ['Calvert-Lewin','McNeil','Eze','Mateta','Doucouré','Guehi','Sarr','Olise'],
+      ['Solanke','Semenyo','Jiménez','Iwobi','Adams','Smith Rowe','Evanilson','Pereira'],
+      ['Mbeumo','Wissa','Toney','Gibbs-White','Wood','Rico Henry','Schade','Elanga'],
+      ['Cunha','Hwang','Ampadu','Piroe','Neto','Gnonto','Sarabia','James'],
+      ['Watkins','Rogers','Salah','Gakpo','Mac Allister','Diaz','Konaté','Szoboszlai']
+    ]
+  },
+  laliga:{
+    name:'LaLiga',flag:'🇪🇸',subtitle:'Espanha • Rodada virtual',
+    games:[
+      ['Real Madrid','Barcelona'],['Atlético de Madrid','Sevilla'],['Athletic Bilbao','Real Sociedad'],['Valencia','Villarreal'],
+      ['Girona','Betis'],['Villarreal','Osasuna'],['Celta','Getafe'],['Rayo Vallecano','Mallorca'],
+      ['Espanyol','Valencia'],['Barcelona','Athletic Bilbao']
+    ],
+    players:[
+      ['Vini Jr.','Mbappé','Bellingham','Rodrygo','Lewandowski','Lamine Yamal','Pedri','Raphinha'],
+      ['Griezmann','Julián Álvarez','Sorloth','Ocampos','Isco','En-Nesyri','Koke','De Paul'],
+      ['Iñaki Williams','Nico Williams','Oyarzabal','Sancet','Guruzeta','Brais Méndez','Merino','Beñat'],
+      ['Hugo Duro','Pepelu','Dani Parejo','Yeremy Pino','Ayoze','Baena','Thierry Correia','Gerard Moreno'],
+      ['Dovbyk','Stuani','Lo Celso','Abde','Isco','Ayoze','Tsygankov','Jhon Solís'],
+      ['Gerard Moreno','Barry','Budimir','Bryan Zaragoza','Yeremy Pino','Baena','Lucas Torró','Cardona'],
+      ['Iago Aspas','Borja Iglesias','Mata','Mason Greenwood','Hugo Sotelo','Míchel','Mingueza','Sorloth'],
+      ['Isi Palazón','De Frutos','Muriqi','Darder','Camello','Sergio Gómez','Lejeune','Ratiu'],
+      ['Puado','Javi Puado','Hugo Duro','Luis Rioja','Javi Guerra','Pepelu','Darder','Melamed'],
+      ['Lamine Yamal','Lewandowski','Raphinha','Nico Williams','Iñaki Williams','Sancet','Pedri','Olmo']
+    ]
+  },
+  ligue1:{
+    name:'Ligue 1',flag:'🇫🇷',subtitle:'França • Rodada virtual',
+    games:[
+      ['PSG','Marseille'],['Monaco','Lyon'],['Lille','Lens'],['Nice','Rennes'],['Strasbourg','Nantes'],
+      ['Montpellier','Toulouse'],['Brest','Reims'],['Nantes','Auxerre'],['Rennes','Monaco'],['Marseille','Lille']
+    ],
+    players:[
+      ['Dembélé','Kvaratskhelia','Hakimi','Barcola','Kolo Muani','Vitinha','João Neves','Gonçalo Ramos'],
+      ['Greenwood','Aubameyang','Balogun','Golovin','Minamino','Emery','Ben Yedder','Zakaria'],
+      ['Jonathan David','Zhegrova','Diakité','Thuram','Sotoca','Wahi','Cabella','Angel Gomes'],
+      ['Guessand','Laborde','Kalimuendo','Blas','Moffi','Bourigeaud','Cho','Al-Tamari'],
+      ['Emegha','Bakwa','Simon','Abline','Habib Diarra','Mostafa Mohamed','Doukouré','Pereira'],
+      ['Adams','Sierro','King','Dönnum','Tamari','Khazri','Teji Savanier','Nordin'],
+      ['Lajugie','Balde','Doumbia','Ito','Nakamura','Lees-Melou','Doué','Munetsi'],
+      ['Abline','Sinayoko','Traoré','Pereira Lage','Fofana','Mensah','Jubal','Perrin'],
+      ['Kalimuendo','Blas','Embolo','Golovin','Minamino','Zakaria','Ben Seghir','Akliouche'],
+      ['Greenwood','Rabiot','Harit','David','Zhegrova','Andre','Angel Gomes','Wahi']
+    ]
+  },
+  bundesliga:{
+    name:'Bundesliga',flag:'🇩🇪',subtitle:'Alemanha • Rodada virtual',
+    games:[
+      ['Bayern Munich','Borussia Dortmund'],['Bayer Leverkusen','RB Leipzig'],['Eintracht Frankfurt','Stuttgart'],
+      ['Wolfsburg','Borussia Mönchengladbach'],['Freiburg','Mainz'],['Union Berlin','Werder Bremen'],
+      ['Hoffenheim','Augsburg'],['Heidenheim','Bochum'],['Stuttgart','Leverkusen'],['Dortmund','Frankfurt']
+    ],
+    players:[
+      ['Kane','Musiala','Sané','Olise','Coman','Gnabry','Kimmich','Goretzka'],
+      ['Wirtz','Schick','Boniface','Frimpong','Grimaldo','Xhaka','Simons','Openda'],
+      ['Marmoush','Ekitiké','Götze','Hugo Larsson','Demirovic','Undav','Stiller','Millot'],
+      ['Wind','Amoura','Reus','Hack','Plea','Weigl','Scally','Honorat'],
+      ['Grifo','Doan','Höler','Burkardt','Lee','Eggestein','Günter','Höfler'],
+      ['Hollerbach','Ducksch','Stage','Weiser','Bedia','Rönnow','Schafer','Kaufmann'],
+      ['Kramaric','Bebou','Essende','Demirovic','Maier','Jensen','Vargas','Wolf'],
+      ['Pieringer','Kleindienst','Adjei','Holtmann','Schimmer','Passlack','Hofmann','Bernard'],
+      ['Undav','Demirovic','Wirtz','Schick','Frimpong','Grimaldo','Xhaka','Andrich'],
+      ['Guirassy','Adeyemi','Brandt','Malen','Marmoush','Götze','Larsson','Ekitiké']
+    ]
+  },
+  brasileirao:{
+    name:'Brasileirão',flag:'🇧🇷',subtitle:'Brasil • Rodada virtual',
+    games:brasilTeams,
+    players:brasilPlayers
+  }
+};
+
+const leagueOrder=['brasileirao','premier','laliga','ligue1','bundesliga'];
+
+const leagueData={};
+leagueOrder.forEach(key=>{
+  const src=leagueSeed[key];
+  leagueData[key]={
+    key,name:src.name,flag:src.flag,subtitle:src.subtitle,
+    games:src.games.map((g,i)=>({teams:g,players:src.players[i%src.players.length]}))
+  };
+});
+
+/* =========================
+   ESTADO GLOBAL
+   ========================= */
+let balance = null; // saldo exibido: consulta autenticada ao RoyalBet; nunca alterado pelo BetFut
+let picks=[], current=0, currentLeague='brasileirao', timer=null, state=null;
+
+// Cliente público: a autenticação do RoyalBet é reutilizada quando as páginas
+// estão sob o mesmo domínio GitHub Pages. Não inclua chave service_role aqui.
+const SUPABASE_URL = 'https://egerudplakshmjpcvvws.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_3jlJ296WNi59RcUEsm4WBA_4lz_HiQU';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+function updateBalance(){
+  document.getElementById('balance').textContent =
+    Number.isFinite(balance) ? balance.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' CR' : 'Entre no RoyalBet';
+}
+async function loadRoyalBalance(){
+  const display=document.getElementById('balance');
+  if(!window.supabase){display.textContent='Conexão indisponível';return;}
+  try{
+    const {data:auth,error:authError}=await supabaseClient.auth.getUser();
+    if(authError||!auth.user){balance=null;updateBalance();return;}
+    const {data:profile,error}=await supabaseClient.rpc('royal_get_profile');
+    if(error)throw error;
+    const value=Number(profile?.balance);
+    if(!Number.isFinite(value)||value<0)throw Error('Saldo inválido');
+    balance=value;
+    updateBalance();
+  }catch(e){
+    console.warn('Não foi possível consultar o saldo RoyalBet:',e);
+    balance=null;
+    display.textContent='Saldo indisponível';
+  }
+}
+window.addEventListener('focus',loadRoyalBalance);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadRoyalBalance();});
+
+function renderHome(){
+  const grid=document.getElementById('leagueGrid');
+  grid.innerHTML=leagueOrder.map(key=>{
+    const l=leagueData[key];
+    return `<button class="league-card" onclick="openLeague('${key}')">
+      <span class="count">${l.games.length} jogos</span>
+      <div class="emoji">${l.flag}</div>
+      <h3>${l.name}</h3>
+      <p>${l.subtitle}<br>Saldo compartilhado com as outras ligas.</p>
+    </button>`;
+  }).join('');
+}
+
+function openLeague(key){
+  if(timer || !document.getElementById('liveModal').classList.contains('hidden')) return;
+  currentLeague=key;
+  picks=[];
+  current=0;
+  const l=leagueData[key];
+  document.getElementById('leagueName').textContent=l.name;
+  document.getElementById('leagueFlag').textContent=l.flag;
+  document.getElementById('leagueSubtitle').textContent=l.subtitle;
+  document.getElementById('gamesTitle').textContent='⚽ '+l.games.length+' partidas';
+  document.getElementById('homeScreen').style.display='none';
+  document.getElementById('leagueView').style.display='block';
+  document.getElementById('homeBtnTop').style.display='inline-block';
+  renderGames();
+  renderSlip();
+  updateBalance();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goHome(){
+  if(timer || state?.games?.some(g=>!g.finished)) return;
+  closeModal();
+  closeLiveModal();
+  picks=[];
+  renderSlip();
+  document.getElementById('leagueView').style.display='none';
+  document.getElementById('homeScreen').style.display='block';
+  document.getElementById('homeBtnTop').style.display='none';
+  updateBalance();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderGames(){
+  const l=leagueData[currentLeague];
+  document.getElementById('games').innerHTML=l.games.map((g,i)=>{
+    const hour=19+Math.floor(i/4), minute=(i%4)*15;
+    return `<div class="game">
+      <div class="game-top"><span>JOGO ${i+1}/${l.games.length}</span><span>Hoje • ${hour}:${String(minute).padStart(2,'0')}</span></div>
+      <div class="teams"><span>${g.teams[0]}</span><span>VS</span><span>${g.teams[1]}</span></div>
+      <div class="game-bottom"><span class="muted">Resultado • Gols • Escanteios</span><button class="btn primary" onclick="openMatch(${i})">Palpitar ›</button></div>
+    </div>`;
+  }).join('');
+}
+
+function marketList(i){
+  const match=leagueData[currentLeague].games[i], h=match.teams[0], a=match.teams[1], plist=match.players;
+  const m=[
+    ['Vitória '+h,1.45+i%5*.18,'result'],
+    ['Empate',2.85+i%4*.2,'result'],
+    ['Vitória '+a,1.85+i%6*.23,'result'],
+    ['Mais de 1.5 gols',1.28+i%4*.07,'goals'],
+    ['Menos de 1.5 gols',2.45+i%3*.12,'goals'],
+    ['Mais de 2.0 gols',1.48+i%4*.09,'goals'],
+    ['Menos de 2.0 gols',2.1+i%3*.15,'goals'],
+    ['Mais de 2.5 gols',1.65+i%5*.13,'goals'],
+    ['Menos de 2.5 gols',1.72+i%3*.15,'goals'],
+    ['Mais de 3.5 gols',2.05+i%4*.15,'goals'],
+    ['Menos de 3.5 gols',1.3+i%4*.06,'goals'],
+    ['Mais de 4.5 gols',2.8+i%3*.25,'goals'],
+    ['Menos de 4.5 gols',1.12+i%4*.04,'goals'],
+    ['Mais de 5.5 gols',4.2+i%3*.3,'goals'],
+    ['Menos de 5.5 gols',1.05+i%3*.03,'goals'],
+    ['Mais de 6.0 gols',6.5+i%3*.5,'goals'],
+    ['Menos de 6.0 gols',1.02+i%3*.02,'goals'],
+    ['Mais de 2.5 escanteios',1.16+i%4*.05,'corners'],
+    ['Menos de 2.5 escanteios',3.3+i%3*.2,'corners'],
+    ['Mais de 3.5 escanteios',1.28+i%4*.05,'corners'],
+    ['Menos de 3.5 escanteios',2.8+i%3*.18,'corners'],
+    ['Mais de 4.5 escanteios',1.42+i%4*.06,'corners'],
+    ['Menos de 4.5 escanteios',2.35+i%3*.15,'corners'],
+    ['Mais de 5.5 escanteios',1.55+i%4*.07,'corners'],
+    ['Menos de 5.5 escanteios',2.08+i%3*.14,'corners'],
+    ['Mais de 6.5 escanteios',1.68+i%4*.07,'corners'],
+    ['Menos de 6.5 escanteios',1.92+i%3*.13,'corners'],
+    ['Mais de 7.5 escanteios',1.82+i%4*.08,'corners'],
+    ['Menos de 7.5 escanteios',1.78+i%3*.12,'corners'],
+    ['Mais de 8.5 escanteios',1.98+i%4*.08,'corners'],
+    ['Menos de 8.5 escanteios',1.62+i%3*.11,'corners'],
+    ['Mais de 9.5 escanteios',2.18+i%4*.1,'corners'],
+    ['Menos de 9.5 escanteios',1.5+i%3*.1,'corners'],
+    ['Mais de 10.5 escanteios',2.38+i%4*.11,'corners'],
+    ['Menos de 10.5 escanteios',1.42+i%3*.09,'corners'],
+    ['Mais de 11.5 escanteios',2.58+i%4*.12,'corners'],
+    ['Menos de 11.5 escanteios',1.35+i%3*.08,'corners'],
+    ['Mais de 12.5 escanteios',2.8+i%4*.13,'corners'],
+    ['Menos de 12.5 escanteios',1.3+i%3*.08,'corners'],
+    ['Mais de 13.5 escanteios',3.05+i%4*.14,'corners'],
+    ['Menos de 13.5 escanteios',1.25+i%3*.07,'corners'],
+    ['Mais de 14.5 escanteios',3.25+i%4*.15,'corners'],
+    ['Menos de 14.5 escanteios',1.21+i%3*.07,'corners'],
+    ['Mais de 15.5 escanteios',3.5+i%4*.16,'corners'],
+    ['Menos de 15.5 escanteios',1.18+i%3*.06,'corners'],
+    ['Mais de 16.5 escanteios',3.8+i%4*.18,'corners'],
+    ['Menos de 16.5 escanteios',1.15+i%3*.06,'corners'],
+    ['Mais de 17.5 escanteios',4.05+i%4*.2,'corners'],
+    ['Menos de 17.5 escanteios',1.12+i%3*.05,'corners'],
+    ['Mais de 18.5 escanteios',4.35+i%4*.22,'corners'],
+    ['Menos de 18.5 escanteios',1.1+i%3*.05,'corners'],
+    ['Mais de 19.5 escanteios',4.7+i%4*.25,'corners'],
+    ['Menos de 19.5 escanteios',1.08+i%3*.05,'corners'],
+    ['Mais de 20 escanteios',5.0+i%4*.28,'corners'],
+    ['Menos de 20 escanteios',1.06+i%3*.04,'corners'],
+    ['Mais de 2 cartões',1.35+i%4*.06,'cards'],
+    ['Menos de 2 cartões',2.65+i%3*.16,'cards'],
+    ['Mais de 3 cartões',1.5+i%4*.06,'cards'],
+    ['Menos de 3 cartões',2.3+i%3*.14,'cards'],
+    ['Mais de 4 cartões',1.66+i%4*.07,'cards'],
+    ['Menos de 4 cartões',2.05+i%3*.13,'cards'],
+    ['Mais de 5 cartões',1.82+i%4*.08,'cards'],
+    ['Menos de 5 cartões',1.88+i%3*.12,'cards'],
+    ['Mais de 6 cartões',2.0+i%4*.08,'cards'],
+    ['Menos de 6 cartões',1.72+i%3*.11,'cards'],
+    ['Mais de 7 cartões',2.2+i%4*.09,'cards'],
+    ['Menos de 7 cartões',1.58+i%3*.1,'cards'],
+    ['Mais de 8 cartões',2.4+i%4*.1,'cards'],
+    ['Menos de 8 cartões',1.48+i%3*.09,'cards'],
+    ['Mais de 9 cartões',2.62+i%4*.11,'cards'],
+    ['Menos de 9 cartões',1.4+i%3*.08,'cards'],
+    ['Mais de 10 cartões',2.85+i%4*.12,'cards'],
+    ['Menos de 10 cartões',1.34+i%3*.07,'cards'],
+    ['Mais de 11 cartões',3.05+i%4*.13,'cards'],
+    ['Menos de 11 cartões',1.3+i%3*.07,'cards'],
+    ['Mais de 12 cartões',3.3+i%4*.14,'cards'],
+    ['Menos de 12 cartões',1.26+i%3*.06,'cards'],
+    ['Mais de 13 cartões',3.55+i%4*.15,'cards'],
+    ['Menos de 13 cartões',1.22+i%3*.06,'cards'],
+    ['Mais de 14 cartões',3.8+i%4*.16,'cards'],
+    ['Menos de 14 cartões',1.18+i%3*.05,'cards'],
+    ['Mais de 15 cartões',4.1+i%4*.18,'cards'],
+    ['Menos de 15 cartões',1.15+i%3*.05,'cards'],
+    ['Ambas marcam — Sim',1.82+i%4*.15,'other'],
+    [h+' marca',1.55+i%4*.08,'team_score','home'],
+    [a+' marca',1.6+i%4*.08,'team_score','away'],
+    ['1º tempo — '+h,2.0+i%4*.12,'half1','home'],
+    ['1º tempo — '+a,2.35+i%4*.14,'half1','away'],
+    ['1º tempo — Empate',2.2+i%4*.13,'half1','draw'],
+    ['2º tempo — '+h,2.0+i%4*.12,'half2','home'],
+    ['2º tempo — '+a,2.35+i%4*.14,'half2','away'],
+    ['2º tempo — Empate',2.2+i%4*.13,'half2','draw']
+  ];
+  plist.forEach((p,j)=>m.push([p+' faz gol',2.1+j*.65+i%3*.12,'player',p]));
+  return m;
+}
+
+function openMatch(i){
+  current=i;
+  const match=leagueData[currentLeague].games[i];
+  document.getElementById('marketTitle').textContent=match.teams[0]+' x '+match.teams[1]+' • '+leagueData[currentLeague].name;
+  const groups=[
+    ['🏆 Resultado da partida','result'],['⚽ Total de gols','goals'],['🚩 Escanteios','corners'],['🟨 Cartões','cards'],
+    ['⚽ Quem fará o gol?','player'],['🔁 Outros mercados','other'],['🟢 Qual time marca primeiro','team_score'],
+    ['⏱️ 1º tempo — quem termina ganhando','half1'],['⏱️ 2º tempo — quem termina ganhando','half2']
+  ];
+  document.getElementById('markets').innerHTML='<div class="market-grid">'+groups.map(([title,type])=>{
+    const items=marketList(i).filter(x=>x[2]===type);
+    return items.length?'<div class="market-section"><h3>'+title+'</h3><div class="odds">'+items.map(oddHTML).join('')+'</div></div>':'';
+  }).join('')+'</div>';
+  document.getElementById('startFromModal').disabled=!picks.length;
+  document.getElementById('marketModal').classList.remove('hidden');
+}
+
+function startBetFromModal(){
+  if(!picks.length)return;
+  closeModal();
+  closeBet();
+}
+
+function oddHTML(m){
+  const key=m[0], id=currentLeague+'|'+current+'|'+key;
+  const sel=picks.some(p=>p.id===id);
+  return `<button class="odd ${sel?'selected':''}" onclick="togglePick('${id.replace(/'/g,"\\'")}','${key.replace(/'/g,"\\'")}',${m[1]},'${m[3]||''}')"><small>${key}</small></button>`;
+}
+
+function togglePick(id,name,odd,player){
+  let ix=picks.findIndex(p=>p.id===id);
+  if(ix>=0){
+    picks.splice(ix,1);
+  }else{
+    const marketGroup =
+      name.startsWith('Vitória ') || name==='Empate' ? 'result' :
+      name.includes('gols') ? 'goals' :
+      name.includes('escanteios') ? 'corners' :
+      name.includes('cartões') ? 'cards' :
+      name.startsWith('Ambas marcam') ? 'btts' :
+      name.includes(' marca') ? 'team_score' :
+      name.startsWith('1º tempo') ? 'half1' :
+      name.startsWith('2º tempo') ? 'half2' :
+      player ? 'player' : name;
+    if(marketGroup!=='player'){
+      picks=picks.filter(p => !(p.league===currentLeague && p.gid===current && p.marketGroup===marketGroup));
+    }
+    const match=leagueData[currentLeague].games[current];
+    picks.push({
+      id,league:currentLeague,gid:current,name,odd,player,marketGroup,
+      home:match.teams[0],away:match.teams[1]
+    });
+  }
+  openMatch(current);
+  renderSlip();
+}
+
+function closeModal(){document.getElementById('marketModal').classList.add('hidden')}
+
+function renderSlip(){
+  document.getElementById('count').textContent=picks.length+' seleção'+(picks.length==1?'':'ões');
+  const picksDiv=document.getElementById('picks');
+  picksDiv.innerHTML=picks.length ? picks.map((p,i)=>`
+    <div class="pick">
+      <div><b>${p.home} x ${p.away}</b><br><span class="muted">${p.name}</span></div>
+      <strong><button class="remove" onclick="picks.splice(${i},1);renderSlip()" aria-label="Remover palpite">×</button></strong>
+    </div>`).join('') :
+    '<div class="empty">Selecione opções de uma partida para começar.</div>';
+  document.getElementById('closeBet').disabled=!picks.length;
+  document.getElementById('startFromModal').disabled=!picks.length;
+}
+
+function closeBet(){
+  if(!picks.length)return;
+  const chosen=picks.map(p=>({...p}));
+  picks=[];
+  renderSlip();
+  closeModal();
+  startLive(chosen,0,1); // Palpites sem créditos, apostas ou premiações.
+}
+
+function makeMatchState(leagueKey,gid,chosen){
+  const match=leagueData[leagueKey].games[gid], teams=match.teams, players=match.players;
+  const st={leagueKey,gid,g:[...teams],players,chosen,sec:0,h:0,a:0,h1:0,a1:0,c:0,card:0,events:[],goals:[],interval:false,intervalTimer:null,finished:false};
+  let n=Math.floor(Math.random()*4)+Math.floor(Math.random()*4);
+  for(let i=0;i<n;i++) st.goals.push({min:3+Math.floor(Math.random()*87),home:i%2===0,player:players[Math.floor(Math.random()*players.length)]});
+  st.goals.sort((a,b)=>a.min-b.min);
+  return st;
+}
+
+function startLive(chosen,stake,total){
+  const grouped=chosen.reduce((acc,p)=>{
+    const k=p.league+'|'+p.gid;
+    (acc[k] ||= []).push(p);
+    return acc;
+  },{});
+  state={
+    chosen,stake,total,
+    games:Object.values(grouped).map(arr=>makeMatchState(arr[0].league,arr[0].gid,arr)),
+    index:0,wonAll:true
+  };
+  document.getElementById('liveModal').classList.remove('hidden');
+  loadLiveMatch();
+}
+
+function loadLiveMatch(){
+  const s=state.games[state.index],g=s.g;
+  if(timer)clearInterval(timer);
+  if(s.intervalTimer){clearTimeout(s.intervalTimer);s.intervalTimer=null}
+  document.getElementById('lh').textContent=g[0];
+  document.getElementById('la').textContent=g[1];
+  document.getElementById('liveTeams').textContent=leagueData[s.leagueKey].name+' • '+g[0]+' x '+g[1]+' • Partida '+(state.index+1)+' de '+state.games.length;
+  document.getElementById('sh').textContent=document.getElementById('sa').textContent=document.getElementById('corners').textContent=document.getElementById('cards').textContent=document.getElementById('goals').textContent='0';
+  document.getElementById('clock').textContent='00:00';
+  document.getElementById('progress').style.width='0%';
+  document.getElementById('events').innerHTML='Apito inicial! A partida começou.';
+  document.getElementById('final').innerHTML='';
+  document.getElementById('liveStatus').textContent='AO VIVO';
+  timer=setInterval(tick,1000);
+}
+
+function tick(){
+  const s=state.games[state.index];
+  if(s.finished||s.interval)return;
+  s.sec++;
+  const min=Math.min(90,s.sec);
+  document.getElementById('clock').textContent=String(min).padStart(2,'0')+':00';
+  document.getElementById('progress').style.width=min/90*100+'%';
+
+  while(s.goals.length&&s.goals[0].min<=min){
+    const e=s.goals.shift();
+    if(e.home)s.h++;else s.a++;
+    if(e.min<=45){if(e.home)s.h1++;else s.a1++;}
+    s.events.push({...e,type:'goal'});
+  }
+  if(Math.random()<.09){s.c++;s.events.push({min,type:'corner',home:Math.random()<.5});}
+  if(Math.random()<.045){s.card++;s.events.push({min,type:'card',home:Math.random()<.5});}
+
+  document.getElementById('sh').textContent=s.h;
+  document.getElementById('sa').textContent=s.a;
+  document.getElementById('goals').textContent=s.h+s.a;
+  document.getElementById('corners').textContent=s.c;
+  document.getElementById('cards').textContent=s.card;
+  document.getElementById('events').innerHTML=s.events.slice().reverse().map(e=>
+    `<div class="event">${e.min}' — ${e.type==='goal'?'⚽ '+e.player+' ('+(e.home?s.g[0]:s.g[1])+')':e.type==='corner'?'🚩 Escanteio — '+(e.home?s.g[0]:s.g[1]):'🟨 Cartão — '+(e.home?s.g[0]:s.g[1])}</div>`
+  ).join('')||'<span class="muted">Sem lances ainda.</span>';
+
+  if(min===45&&!s.interval){
+    s.interval=true;
+    clearInterval(timer);timer=null;
+    document.getElementById('liveStatus').textContent='INTERVALO';
+    document.getElementById('events').innerHTML='<div class="event"><b>⏸️ Intervalo — fim do 1º tempo</b></div>'+document.getElementById('events').innerHTML;
+    s.intervalTimer=setTimeout(()=>{
+      s.interval=false;s.intervalTimer=null;
+      document.getElementById('liveStatus').textContent='2º TEMPO';
+      timer=setInterval(tick,1000);
+    },2000);
+    return;
+  }
+  if(min>=90)finishMatch();
+}
+
+function evaluateMatch(s){
+  return s.chosen.every(p=>{
+    const n=s.h+s.a;
+    if(p.name.startsWith('Vitória '))return p.name==='Vitória '+s.g[0]?s.h>s.a:s.a>s.h;
+    if(p.name==='Empate')return s.h===s.a;
+    if(p.name.includes('Mais de 1.5'))return n>=2;
+    if(p.name.includes('Menos de 1.5'))return n<2;
+    if(p.name.includes('Mais de 2.0'))return n>2;
+    if(p.name.includes('Menos de 2.0'))return n<2;
+    if(p.name.includes('Mais de 2.5'))return n>=3;
+    if(p.name.includes('Menos de 2.5'))return n<=2;
+    if(p.name.includes('Mais de 3.5'))return n>=4;
+    if(p.name.includes('Menos de 3.5'))return n<=3;
+    if(p.name.includes('Mais de 4.5'))return n>=5;
+    if(p.name.includes('Menos de 4.5'))return n<=4;
+    if(p.name.includes('Mais de 5.5'))return n>=6;
+    if(p.name.includes('Menos de 5.5'))return n<=5;
+    if(p.name.includes('Mais de 6.0'))return n>6;
+    if(p.name.includes('Menos de 6.0'))return n<6;
+    if(p.name.includes('escanteios')){
+      const m=p.name.match(/(Mais|Menos) de ([0-9.]+)/),v=parseFloat(m?.[2]);
+      return m?(m[1]==='Mais'?s.c>v:s.c<v):false;
+    }
+    if(p.name.includes('cartões')){
+      const m=p.name.match(/(Mais|Menos) de ([0-9.]+)/),v=parseFloat(m?.[2]);
+      return m?(m[1]==='Mais'?s.card>v:s.card<v):false;
+    }
+    if(p.name.includes('Ambas'))return s.h>0&&s.a>0;
+    if(p.marketGroup==='team_score') return p.player==='home'?s.h>0:s.a>0;
+    if(p.marketGroup==='half1'){
+      if(p.player==='home')return s.h1>s.a1;
+      if(p.player==='away')return s.a1>s.h1;
+      return s.h1===s.a1;
+    }
+    if(p.marketGroup==='half2'){
+      const h2=s.h-s.h1,a2=s.a-s.a1;
+      if(p.player==='home')return h2>a2;
+      if(p.player==='away')return a2>h2;
+      return h2===a2;
+    }
+    if(p.player)return s.events.some(e=>e.type==='goal'&&e.player===p.player);
+    return false;
+  });
+}
+
+function finishMatch(){
+  const s=state.games[state.index];
+  if(s.finished)return;
+  s.finished=true;
+  if(timer)clearInterval(timer);timer=null;
+  const won=evaluateMatch(s);
+  state.wonAll=state.wonAll&&won;
+  document.getElementById('liveStatus').textContent='ENCERRADA';
+  document.getElementById('final').innerHTML=won
+    ? '<div class="result">✅ <b>Partida acertada!</b><br>'+s.g[0]+' '+s.h+' × '+s.a+' '+s.g[1]+'</div>'
+    : '<div class="result" style="background:#4a2029;color:#ffc0c7">❌ <b>Partida não acertada.</b><br>'+s.g[0]+' '+s.h+' × '+s.a+' '+s.g[1]+'</div>';
+
+  if(state.index<state.games.length-1){
+    setTimeout(()=>{state.index++;loadLiveMatch()},1500);
+  }else{
+    setTimeout(()=>{
+      const sAll=state;
+      if(sAll.wonAll){
+        document.getElementById('final').innerHTML='<div class="result">✅ <b>Você acertou todos os palpites!</b><br><small>O saldo do RoyalBet não foi alterado.</small></div>';
+      }else{
+        document.getElementById('final').innerHTML='<div class="result" style="background:#4a2029;color:#ffc0c7">❌ <b>Nem todos os palpites foram acertados.</b><br>Uma ou mais previsões não coincidiram com a simulação.<br><small>O saldo do RoyalBet não foi alterado.</small></div>';
+      }
+    },1500);
+  }
+}
+
+function closeLiveModal(){
+  if(timer)clearInterval(timer);
+  timer=null;
+  state?.games?.forEach(g=>{if(g.intervalTimer)clearTimeout(g.intervalTimer)});
+  document.getElementById('liveModal').classList.add('hidden');
+}
+
+function resetGame(){
+  if(timer){clearInterval(timer);timer=null;}
+  state?.games?.forEach(g=>{if(g.intervalTimer)clearTimeout(g.intervalTimer)});
+  state=null;
+  picks=[];
+  loadRoyalBalance(); // Reconsulta, sem zerar ou modificar a conta.
+  renderSlip();
+  closeModal();
+  closeLiveModal();
+  document.getElementById('leagueView').style.display='none';
+  document.getElementById('homeScreen').style.display='block';
+  document.getElementById('homeBtnTop').style.display='none';
+  renderHome();
+}
+
+renderHome();
+renderSlip();
+loadRoyalBalance();
+</script>
+</body>
+</html>
