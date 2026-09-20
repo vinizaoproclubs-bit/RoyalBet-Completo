@@ -147,7 +147,7 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
 <nav>
 <div class="nav-item active" onclick="UI.nav('home')">🏠 <span>Início</span></div>
 <div class="nav-item" onclick="UI.nav('games')">🎮 <span>Jogos</span></div>
-<div class="nav-item" onclick="UI.nav('sports')">⚽ <span>Futebol</span></div>
+<a class="nav-item" href="betfut_ligas_5_campeonatos.html" onclick="return abrirFutebol(event)" style="text-decoration:none">⚽ <span>Futebol</span></a>
 <div class="nav-item" onclick="UI.nav('history')">📜 <span>Histórico</span></div>
 <div class="nav-item" onclick="UI.nav('help')">ℹ️ <span>Como jogar</span></div>
 <div class="nav-item text-danger" onclick="Sys.resetDemo()">🔄 <span>Reset</span></div>
@@ -202,11 +202,6 @@ main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section
 <button class="btn btn-gold" id="crash-btn-bet" onclick="Crash.toggleBet()" style="padding:20px;font-size:18px">APOSTAR</button><div id="crash-msg" style="text-align:center;margin-top:10px;color:var(--text-muted);font-size:14px">Aguardando aposta...</div></div>
 <div class="game-area"><div class="crash-history-strip" id="crash-history-strip"></div><div class="crash-area"><div class="crash-multiplier" id="crash-mult">1.00x</div><div class="plane-container" id="crash-plane"><div class="plane">✈️</div></div></div></div></div>
 
-<div id="view-sports" class="view-section hidden">
-<section class="glass" style="padding:22px;margin-bottom:16px"><h1>⚽ Futebol • Simulador</h1><p style="color:var(--text-muted);margin-top:8px">Cinco campeonatos e partidas fictícias. Palpites recreativos, sem apostas, débitos ou prêmios.</p><p style="margin-top:12px">Saldo da sua conta RoyalBet: <strong class="text-gold" id="sports-balance">—</strong> moedas virtuais (somente consulta).</p></section>
-<div id="sports-leagues" class="games-grid"></div>
-<section id="sports-fixtures" class="glass hidden" style="padding:20px;margin-top:18px"><button class="btn" onclick="Sports.home()">← Voltar às ligas</button><h2 id="sports-title" style="margin:18px 0"></h2><div id="sports-matches" class="games-grid"></div></section>
-</div>
 <div id="view-history" class="view-section hidden glass" style="padding:30px"><h2>📜 Histórico de Jogadas</h2><p style="margin-bottom:20px;color:var(--text-muted)">Suas últimas 50 partidas, salvas na sua conta.</p><div style="overflow-x:auto"><table class="history-table"><thead><tr><th>Horário</th><th>Jogo</th><th>Aposta</th><th>Mult.</th><th>Prêmio</th><th>Resultado</th></tr></thead><tbody id="history-tbody"></tbody></table></div><div id="history-empty" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhuma jogada registrada ainda.</div></div>
 
 <div id="view-help" class="view-section hidden glass" style="padding:30px"><h2 style="margin-bottom:20px">ℹ️ Como Jogar (Modo Demo)</h2><div class="help-grid">
@@ -371,7 +366,7 @@ const Sys={
  toggleSound(){AudioSys.init();AudioSys.toggle()}
 };
 
-const UI={views:['home','games','sports','history','help','game-mines','game-slots','game-penalty','game-crash'],nav(id){try{AudioSys.init();AudioSys.play('click')}catch(e){};this.views.forEach(v=>{const e=document.getElementById(v.startsWith('game-')?v:`view-${v}`);if(e)e.classList.add('hidden')});document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const t=document.getElementById(id.startsWith('game-')?id:`view-${id}`);if(!t)return;t.classList.remove('hidden');if(['home','games','sports','history','help'].includes(id)){document.querySelectorAll('.nav-item').forEach(e=>{const s=e.innerText.toLowerCase();if((id==='home'&&s.includes('início'))||(id==='games'&&s.includes('jogos'))||(id==='sports'&&s.includes('futebol'))||(id==='history'&&s.includes('histórico'))||(id==='help'&&s.includes('como jogar')))e.classList.add('active')})}if(id==='game-mines'&&typeof Mines!=='undefined'&&!Mines.playing)Mines.initUI();if(id==='game-slots'&&typeof Slots!=='undefined'&&!Slots.spinning)Slots.initUI();if(id==='game-penalty'&&typeof Penalty!=='undefined'){if(!Penalty.initialized)Penalty.init();else Penalty.draw()}if(id==='game-crash'&&typeof Crash!=='undefined'){Crash.renderHistoryStrip();Crash.initIdleState()}if(id==='sports')Sports.home();if(id==='history')this.renderHistory();window.scrollTo(0,0)},loadGame(g){this.nav('game-'+g)},showModal(id){document.getElementById(id)?.classList.remove('hidden')},hideModal(id){document.getElementById(id)?.classList.add('hidden')},renderHistory(){const tb=document.getElementById('history-tbody'),empty=document.getElementById('history-empty');if(!tb||!empty)return;tb.innerHTML='';empty.classList.toggle('hidden',Sys.history.length>0);Sys.history.forEach(h=>{const tr=document.createElement('tr'),win=Number(h.prize)>0;tr.innerHTML=`<td>${h.time}</td><td><strong>${h.game}</strong></td><td>${Number(h.bet).toFixed(2)}</td><td class="${win?'text-success':'text-danger'}">${h.mult}</td><td class="${win?'text-success':''}">+${Number(h.prize).toFixed(2)}</td><td>${h.result}</td>`;tb.appendChild(tr)})}};
+const UI={views:['home','games','history','help','game-mines','game-slots','game-penalty','game-crash'],nav(id){try{AudioSys.init();AudioSys.play('click')}catch(e){};this.views.forEach(v=>{const e=document.getElementById(v.startsWith('game-')?v:`view-${v}`);if(e)e.classList.add('hidden')});document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const t=document.getElementById(id.startsWith('game-')?id:`view-${id}`);if(!t)return;t.classList.remove('hidden');if(['home','games','history','help'].includes(id)){document.querySelectorAll('.nav-item').forEach(e=>{const s=e.innerText.toLowerCase();if((id==='home'&&s.includes('início'))||(id==='games'&&s.includes('jogos'))||(id==='history'&&s.includes('histórico'))||(id==='help'&&s.includes('como jogar')))e.classList.add('active')})}if(id==='game-mines'&&typeof Mines!=='undefined'&&!Mines.playing)Mines.initUI();if(id==='game-slots'&&typeof Slots!=='undefined'&&!Slots.spinning)Slots.initUI();if(id==='game-penalty'&&typeof Penalty!=='undefined'){if(!Penalty.initialized)Penalty.init();else Penalty.draw()}if(id==='game-crash'&&typeof Crash!=='undefined'){Crash.renderHistoryStrip();Crash.initIdleState()}if(id==='history')this.renderHistory();window.scrollTo(0,0)},loadGame(g){this.nav('game-'+g)},showModal(id){document.getElementById(id)?.classList.remove('hidden')},hideModal(id){document.getElementById(id)?.classList.add('hidden')},renderHistory(){const tb=document.getElementById('history-tbody'),empty=document.getElementById('history-empty');if(!tb||!empty)return;tb.innerHTML='';empty.classList.toggle('hidden',Sys.history.length>0);Sys.history.forEach(h=>{const tr=document.createElement('tr'),win=Number(h.prize)>0;tr.innerHTML=`<td>${h.time}</td><td><strong>${h.game}</strong></td><td>${Number(h.bet).toFixed(2)}</td><td class="${win?'text-success':'text-danger'}">${h.mult}</td><td class="${win?'text-success':''}">+${Number(h.prize).toFixed(2)}</td><td>${h.result}</td>`;tb.appendChild(tr)})}};
 
 const Mines={grid:[],playing:false,bet:0,bombs:3,step:0,mult:1,safeRemaining:0,initUI(){const c=document.getElementById('mines-grid');c.innerHTML='';this.grid=[];for(let i=0;i<25;i++){const e=document.createElement('div');e.className='mine-cell';e.onclick=()=>this.clickCell(i);c.appendChild(e);this.grid.push({el:e,isBomb:false,revealed:false})}document.getElementById('mines-mult-display').innerText='1.00x'},start(){if(this.playing)return;const b=parseFloat(document.getElementById('mines-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.bombs=parseInt(document.getElementById('mines-bombs').value);this.step=0;this.mult=1;this.safeRemaining=25-this.bombs;this.playing=true;Sys.updateBalance(-b);this.initUI();let p=0;while(p<this.bombs){const i=Math.floor(Math.random()*25);if(!this.grid[i].isBomb){this.grid[i].isBomb=true;p++}}document.getElementById('mines-btn-bet').classList.add('hidden');document.getElementById('mines-btn-cashout').classList.remove('hidden');document.getElementById('mines-bombs').disabled=true;document.getElementById('mines-bet').disabled=true;this.updateUI()},clickCell(i){if(!this.playing||this.grid[i].revealed)return;const c=this.grid[i];c.revealed=true;c.el.classList.add('revealed');if(c.isBomb){c.el.classList.add('bomb');c.el.innerText='💣';AudioSys.play('explosion');this.endGame(false);return}c.el.classList.add('diamond');c.el.innerText='💎';this.step++;this.safeRemaining--;const cellsLeft=25-(this.step-1),safeLeft=cellsLeft-this.bombs;this.mult*=Math.max(1.01,(cellsLeft/safeLeft)*.97);AudioSys.play('tick');this.updateUI();if(this.safeRemaining<=0)this.cashout()},cashout(){if(!this.playing||this.step<=0)return;const prize=this.bet*this.mult;Sys.updateBalance(prize);this.endGame(true,prize);AudioSys.play('win')},endGame(win,prize=0){this.playing=false;this.grid.forEach(c=>{if(!c.revealed){c.el.classList.add('revealed');c.el.style.opacity='.5';c.el.classList.add(c.isBomb?'bomb':'diamond');c.el.innerText=c.isBomb?'💣':'💎'}});document.getElementById('mines-btn-bet').classList.remove('hidden');document.getElementById('mines-btn-cashout').classList.add('hidden');document.getElementById('mines-bombs').disabled=false;document.getElementById('mines-bet').disabled=false;if(win){Sys.addHistory('Mine Bomber',this.bet,this.mult.toFixed(2)+'x',prize,'Ganhou');document.getElementById('mines-msg').innerHTML=`<span class="text-success">Você coletou ${prize.toFixed(2)} moedas!</span>`}else{Sys.addHistory('Mine Bomber',this.bet,'0.00x',0,'Bomba');document.getElementById('mines-msg').innerHTML=`<span class="text-danger">BOOM! Você perdeu ${this.bet.toFixed(2)}.</span>`}},updateUI(){document.getElementById('mines-mult-display').innerText=this.mult.toFixed(2)+'x';document.getElementById('mines-msg').innerText=`Restam ${this.safeRemaining} diamantes e ${this.bombs} bombas.`;if(this.step)document.getElementById('mines-btn-cashout').innerText=`COLETAR ${(this.bet*this.mult).toFixed(2)}`}};
 
@@ -449,6 +444,19 @@ const Penalty={state:'IDLE',playing:false,initialized:false,bet:0,step:0,mults:[
 
 const Crash={state:'idle',mult:1,bet:0,loop:null,crashPoint:0,startTime:0,hasCashedOut:false,historyData:[],initIdleState(){if(this.state==='idle'||this.state==='crashed'){this.resetBtn();document.getElementById('crash-msg').innerText='Aguardando aposta...';document.getElementById('crash-mult').classList.remove('crashed');document.getElementById('crash-mult').innerText='1.00x';document.getElementById('crash-plane').style.transform='translate(0,0)'}},toggleBet(){AudioSys.init();if(this.state==='flying'&&!this.hasCashedOut)return this.cashOut();if(this.state==='idle'){const b=parseFloat(document.getElementById('crash-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.hasCashedOut=false;Sys.updateBalance(-b);this.startFlight()}},startFlight(){this.state='flying';this.mult=1;this.startTime=performance.now();document.getElementById('crash-msg').innerText='Avião decolou!';const r=Math.random();this.crashPoint=r<.03?1:Math.max(1.05,.98/r);const btn=document.getElementById('crash-btn-bet'),m=document.getElementById('crash-mult'),plane=document.getElementById('crash-plane');btn.className='btn btn-success';const tick=(now)=>{if(this.state!=='flying')return;const t=now-this.startTime;this.mult=Math.exp(t/5000);if(this.mult>=this.crashPoint){this.mult=this.crashPoint;this.crash();return}m.innerText=this.mult.toFixed(2)+'x';plane.style.transform=`translate(${Math.min(320,t/15)}px,-${Math.min(220,t/22)}px)`;btn.innerText=`PARAR / COLETAR ${(this.bet*this.mult).toFixed(2)}`;this.loop=requestAnimationFrame(tick)};this.loop=requestAnimationFrame(tick)},cashOut(){if(this.hasCashedOut||this.state!=='flying')return;this.hasCashedOut=true;const p=this.bet*this.mult;Sys.updateBalance(p);Sys.addHistory('Sky Crash',this.bet,this.mult.toFixed(2)+'x',p,'Parou/Coletou');document.getElementById('crash-msg').innerHTML=`<span class="text-success">Lucro coletado: ${p.toFixed(2)} moedas!</span>`;AudioSys.play('win');this.state='idle';cancelAnimationFrame(this.loop);this.resetBtn()},crash(){this.state='crashed';cancelAnimationFrame(this.loop);const m=document.getElementById('crash-mult');m.innerText=this.mult.toFixed(2)+'x';m.classList.add('crashed');document.getElementById('crash-msg').innerHTML='<span class="text-danger">CRASH! O avião caiu.</span>';if(!this.hasCashedOut)Sys.addHistory('Sky Crash',this.bet,'0.00x',0,'Crash');this.historyData.unshift(this.mult);this.historyData=this.historyData.slice(0,10);this.renderHistoryStrip();this.resetBtn();setTimeout(()=>{this.state='idle';this.initIdleState()},1800)},resetBtn(){const b=document.getElementById('crash-btn-bet');b.className='btn btn-gold';b.innerText='APOSTAR'},renderHistoryStrip(){const s=document.getElementById('crash-history-strip');if(!s)return;s.innerHTML='';this.historyData.forEach(m=>{const e=document.createElement('div');e.className='crash-hist-badge '+(m>=2?'high':'low');e.innerText=m.toFixed(2)+'x';s.appendChild(e)})}};
 
+// Aguarda atualizações pendentes antes de navegar para o futebol.
+async function abrirFutebol(event) {
+  event.preventDefault();
+  if (!Sys.ready) { alert('Aguarde o carregamento dos dados da sua conta.'); return false; }
+  if (Mines.playing || Slots.spinning || Penalty.playing || Crash.state === 'flying') {
+    alert('Conclua a partida atual antes de abrir o futebol.'); return false;
+  }
+  await Sys.queue;
+  if (!Sys.ready) { alert('O saldo ainda não foi sincronizado. Atualize a página.'); return false; }
+  window.location.assign('betfut_ligas_5_campeonatos.html');
+  return false;
+}
+
 window.addEventListener('load',()=>{Sys.updateBalance(0);Mines.initUI();Slots.initUI();Penalty.init();Crash.renderHistoryStrip();UI.nav('home')});
 
 // Links de recuperação criam uma sessão temporária: não abrir o jogo antes de trocar a senha.
@@ -481,141 +489,6 @@ window.addEventListener('focus',async()=>{
  try{const {data,error}=await supabaseClient.rpc('royal_get_profile');if(!error&&data){Sys.balance=Number(data.balance);Sys.renderBalance()}}catch(e){console.warn('Sincronização adiada',e)}
 });
     
-</script>
-
-<script>
-// Dados de clubes e ligas extraídos do simulador fornecido; sem sua mecânica de apostas.
-(()=>{
-const brasilTeams=[['Flamengo','Santos'],['Palmeiras','Corinthians'],['São Paulo','Grêmio'],['Fluminense','Botafogo'],['Vasco','Internacional'],['Atlético-MG','Cruzeiro'],['Bahia','Fortaleza'],['Athletico-PR','Coritiba'],['Bragantino','Sport'],['Ceará','Vitória'],['Juventude','Goiás'],['Grêmio','Bahia'],['Santos','São Paulo'],['Corinthians','Fluminense'],['Botafogo','Palmeiras']];
-const brasilPlayers=[
-['Pedro','Bruno Henrique','De Arrascaeta','Luiz Araújo','Soteldo','Neymar Jr','Barreal','Thaciano'],
-['Vitor Roque','Paulinho','Jhon Arias','Andreas Pereira','Yuri Alberto','Rodrigo Garro','Kaio César','Raniele'],
-['Lucas Moura','Calleri','Luciano','Oscar','Braithwaite','Tetê','Amuzu','Carlos Vinícius'],
-['Germán Cano','Soteldo','Kevin Serna','Agustín Canobbio','Arthur Cabral','Alex Telles','Matheus Martins','Lucas Villalba'],
-['Vegetti','Payet','Rayan','Coutinho','Alan Patrick','Borré','Enner Valencia','Bruno Henrique'],
-['Hulk','Bernard','Reinier','Tomás Cuello','Kaio Jorge','Matheus Pereira','Christian','Sinisterra'],
-['Everton Ribeiro','Erick Pulga','Rodrigo Nestor','Alejo Véliz','Luciano Juba','Mastriani','Pochettino','Marinho'],
-['Mastriani','Cuello','Zapelli','Erick','Canobbio','Soteldo','Kevin Serna','Agustín Canobbio'],
-['Eduardo Sasha','Helinho','Vitinho','Fernando','Pedro Henrique','Eric Ramires','Juninho Capixaba','Isidro Pita'],
-['Erick Pulga','Saulo Mineiro','Lourenço','Mugni','Matheuzinho','Osvaldo','Renato Kayzer','Lucas Esteves'],
-['Gilberto','Lucas Barbosa','Nenê','Erick','Thiago Galhardo','Matheus Bianqui','Robson','Júnior Brumado'],
-['Braithwaite','Tetê','Amuzu','Carlos Vinícius','Guilherme','Soteldo','Giuliano','Rincón'],
-['Guilherme','Soteldo','Giuliano','Rincón','Yuri Alberto','Rodrigo Garro','Memphis','Kaio César'],
-['Yuri Alberto','Rodrigo Garro','Memphis','Kaio César','Germán Cano','Kevin Serna','Soteldo','Agustín Canobbio'],
-['Arthur Cabral','Matheus Martins','Lucas Villalba','Júnior Santos','Vitor Roque','Jhon Arias','Paulinho','Ramón Sosa']
-];
-
-const leagueSeed={
-  premier:{
-    name:'Premier League',flag:'🏴',subtitle:'Inglaterra • Rodada virtual',
-    games:[
-      ['Arsenal','Chelsea'],['Liverpool','Manchester City'],['Manchester United','Tottenham'],['Newcastle','Aston Villa'],
-      ['Brighton','West Ham'],['Everton','Crystal Palace'],['AFC Bournemouth','Fulham'],['Brentford','Nottingham Forest'],
-      ['Wolverhampton','Leeds'],['Aston Villa','Liverpool']
-    ],
-    players:[
-      ['Saka','Havertz','Ødegaard','Martinelli','Palmer','Jackson','Rice','Caicedo'],
-      ['Salah','Luis Díaz','Núñez','Haaland','Foden','De Bruyne','Szoboszlai','Grealish'],
-      ['Bruno Fernandes','Rashford','Højlund','Son','Kulusevski','Brennan Johnson','Mainoo','Maddison'],
-      ['Isak','Gordon','Watkins','Tielemans','Anthony Gordon','Bailey','Rogers','Joelinton'],
-      ['Mitoma','Welbeck','Mbeumo','Paquetá','Bowen','João Pedro','Gross','Kudus'],
-      ['Calvert-Lewin','McNeil','Eze','Mateta','Doucouré','Guehi','Sarr','Olise'],
-      ['Solanke','Semenyo','Jiménez','Iwobi','Adams','Smith Rowe','Evanilson','Pereira'],
-      ['Mbeumo','Wissa','Toney','Gibbs-White','Wood','Rico Henry','Schade','Elanga'],
-      ['Cunha','Hwang','Ampadu','Piroe','Neto','Gnonto','Sarabia','James'],
-      ['Watkins','Rogers','Salah','Gakpo','Mac Allister','Diaz','Konaté','Szoboszlai']
-    ]
-  },
-  laliga:{
-    name:'LaLiga',flag:'🇪🇸',subtitle:'Espanha • Rodada virtual',
-    games:[
-      ['Real Madrid','Barcelona'],['Atlético de Madrid','Sevilla'],['Athletic Bilbao','Real Sociedad'],['Valencia','Villarreal'],
-      ['Girona','Betis'],['Villarreal','Osasuna'],['Celta','Getafe'],['Rayo Vallecano','Mallorca'],
-      ['Espanyol','Valencia'],['Barcelona','Athletic Bilbao']
-    ],
-    players:[
-      ['Vini Jr.','Mbappé','Bellingham','Rodrygo','Lewandowski','Lamine Yamal','Pedri','Raphinha'],
-      ['Griezmann','Julián Álvarez','Sorloth','Ocampos','Isco','En-Nesyri','Koke','De Paul'],
-      ['Iñaki Williams','Nico Williams','Oyarzabal','Sancet','Guruzeta','Brais Méndez','Merino','Beñat'],
-      ['Hugo Duro','Pepelu','Dani Parejo','Yeremy Pino','Ayoze','Baena','Thierry Correia','Gerard Moreno'],
-      ['Dovbyk','Stuani','Lo Celso','Abde','Isco','Ayoze','Tsygankov','Jhon Solís'],
-      ['Gerard Moreno','Barry','Budimir','Bryan Zaragoza','Yeremy Pino','Baena','Lucas Torró','Cardona'],
-      ['Iago Aspas','Borja Iglesias','Mata','Mason Greenwood','Hugo Sotelo','Míchel','Mingueza','Sorloth'],
-      ['Isi Palazón','De Frutos','Muriqi','Darder','Camello','Sergio Gómez','Lejeune','Ratiu'],
-      ['Puado','Javi Puado','Hugo Duro','Luis Rioja','Javi Guerra','Pepelu','Darder','Melamed'],
-      ['Lamine Yamal','Lewandowski','Raphinha','Nico Williams','Iñaki Williams','Sancet','Pedri','Olmo']
-    ]
-  },
-  ligue1:{
-    name:'Ligue 1',flag:'🇫🇷',subtitle:'França • Rodada virtual',
-    games:[
-      ['PSG','Marseille'],['Monaco','Lyon'],['Lille','Lens'],['Nice','Rennes'],['Strasbourg','Nantes'],
-      ['Montpellier','Toulouse'],['Brest','Reims'],['Nantes','Auxerre'],['Rennes','Monaco'],['Marseille','Lille']
-    ],
-    players:[
-      ['Dembélé','Kvaratskhelia','Hakimi','Barcola','Kolo Muani','Vitinha','João Neves','Gonçalo Ramos'],
-      ['Greenwood','Aubameyang','Balogun','Golovin','Minamino','Emery','Ben Yedder','Zakaria'],
-      ['Jonathan David','Zhegrova','Diakité','Thuram','Sotoca','Wahi','Cabella','Angel Gomes'],
-      ['Guessand','Laborde','Kalimuendo','Blas','Moffi','Bourigeaud','Cho','Al-Tamari'],
-      ['Emegha','Bakwa','Simon','Abline','Habib Diarra','Mostafa Mohamed','Doukouré','Pereira'],
-      ['Adams','Sierro','King','Dönnum','Tamari','Khazri','Teji Savanier','Nordin'],
-      ['Lajugie','Balde','Doumbia','Ito','Nakamura','Lees-Melou','Doué','Munetsi'],
-      ['Abline','Sinayoko','Traoré','Pereira Lage','Fofana','Mensah','Jubal','Perrin'],
-      ['Kalimuendo','Blas','Embolo','Golovin','Minamino','Zakaria','Ben Seghir','Akliouche'],
-      ['Greenwood','Rabiot','Harit','David','Zhegrova','Andre','Angel Gomes','Wahi']
-    ]
-  },
-  bundesliga:{
-    name:'Bundesliga',flag:'🇩🇪',subtitle:'Alemanha • Rodada virtual',
-    games:[
-      ['Bayern Munich','Borussia Dortmund'],['Bayer Leverkusen','RB Leipzig'],['Eintracht Frankfurt','Stuttgart'],
-      ['Wolfsburg','Borussia Mönchengladbach'],['Freiburg','Mainz'],['Union Berlin','Werder Bremen'],
-      ['Hoffenheim','Augsburg'],['Heidenheim','Bochum'],['Stuttgart','Leverkusen'],['Dortmund','Frankfurt']
-    ],
-    players:[
-      ['Kane','Musiala','Sané','Olise','Coman','Gnabry','Kimmich','Goretzka'],
-      ['Wirtz','Schick','Boniface','Frimpong','Grimaldo','Xhaka','Simons','Openda'],
-      ['Marmoush','Ekitiké','Götze','Hugo Larsson','Demirovic','Undav','Stiller','Millot'],
-      ['Wind','Amoura','Reus','Hack','Plea','Weigl','Scally','Honorat'],
-      ['Grifo','Doan','Höler','Burkardt','Lee','Eggestein','Günter','Höfler'],
-      ['Hollerbach','Ducksch','Stage','Weiser','Bedia','Rönnow','Schafer','Kaufmann'],
-      ['Kramaric','Bebou','Essende','Demirovic','Maier','Jensen','Vargas','Wolf'],
-      ['Pieringer','Kleindienst','Adjei','Holtmann','Schimmer','Passlack','Hofmann','Bernard'],
-      ['Undav','Demirovic','Wirtz','Schick','Frimpong','Grimaldo','Xhaka','Andrich'],
-      ['Guirassy','Adeyemi','Brandt','Malen','Marmoush','Götze','Larsson','Ekitiké']
-    ]
-  },
-  brasileirao:{
-    name:'Brasileirão',flag:'🇧🇷',subtitle:'Brasil • Rodada virtual',
-    games:brasilTeams,
-    players:brasilPlayers
-  }
-};
-
-const leagueOrder=['brasileirao','premier','laliga','ligue1','bundesliga'];
-
-const leagueData={};
-leagueOrder.forEach(key=>{
-  const src=leagueSeed[key];
-  leagueData[key]={
-    key,name:src.name,flag:src.flag,subtitle:src.subtitle,
-    games:src.games.map((g,i)=>({teams:g,players:src.players[i%src.players.length]}))
-  };
-});
-
-
-const leagues=document.getElementById('sports-leagues');
-const fixtures=document.getElementById('sports-fixtures');
-const matches=document.getElementById('sports-matches');
-const title=document.getElementById('sports-title');
-const safe=(s)=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const sports={
- home(){document.getElementById('sports-balance').textContent=Number(Sys.balance).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});fixtures.classList.add('hidden');leagues.classList.remove('hidden');leagues.innerHTML=leagueOrder.map(k=>{const l=leagueData[k];return `<button class="game-card glass" style="color:white;cursor:pointer;text-align:left" data-league="${k}"><span style="font-size:35px">${l.flag}</span><h3>${safe(l.name)}</h3><p>${l.games.length} partidas fictícias</p><span class="btn">VER PARTIDAS</span></button>`}).join('');},
- open(k){const l=leagueData[k];if(!l)return;leagues.classList.add('hidden');fixtures.classList.remove('hidden');title.textContent=l.flag+' '+l.name;matches.innerHTML=l.games.map((g,i)=>`<article class="game-card glass" style="align-items:stretch"><p>Partida ${i+1} • Simulação</p><h3>${safe(g.teams[0])} × ${safe(g.teams[1])}</h3><button class="btn" data-match="${i}">SIMULAR PARTIDA</button><p class="sports-result" aria-live="polite"></p></article>`).join('');matches.querySelectorAll('[data-match]').forEach(b=>b.addEventListener('click',()=>{const card=b.closest('article');const a=Math.floor(Math.random()*5),c=Math.floor(Math.random()*5);card.querySelector('.sports-result').textContent=`Placar fictício: ${a} × ${c}`;b.textContent='SIMULAR NOVAMENTE';}));}
-};
-leagues.addEventListener('click',e=>{const b=e.target.closest('[data-league]');if(b)sports.open(b.dataset.league)});
-window.Sports=sports;
-})();
 </script>
 </body>
 </html>
