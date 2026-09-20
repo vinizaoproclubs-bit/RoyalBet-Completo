@@ -308,19 +308,20 @@ leagueOrder.forEach(key=>{
    ========================= */
 let balance = null; // saldo exibido: consulta autenticada ao RoyalBet; nunca alterado pelo BetFut
 let picks=[], current=0, currentLeague='brasileirao', timer=null, state=null;
+let nextTimer=null, simulationId=0; // Cancela callbacks de partidas antigas ao sair/reiniciar.
 
 // Cliente público: a autenticação do RoyalBet é reutilizada quando as páginas
 // estão sob o mesmo domínio GitHub Pages. Não inclua chave service_role aqui.
 const SUPABASE_URL = 'https://egerudplakshmjpcvvws.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_3jlJ296WNi59RcUEsm4WBA_4lz_HiQU';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 function updateBalance(){
   document.getElementById('balance').textContent =
     Number.isFinite(balance) ? balance.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' CR' : 'Entre no RoyalBet';
 }
 async function loadRoyalBalance(){
   const display=document.getElementById('balance');
-  if(!window.supabase){display.textContent='Conexão indisponível';return;}
+  if(!supabaseClient){display.textContent='Conexão indisponível';return;}
   try{
     const {data:auth,error:authError}=await supabaseClient.auth.getUser();
     if(authError||!auth.user){balance=null;updateBalance();return;}
@@ -587,6 +588,8 @@ function makeMatchState(leagueKey,gid,chosen){
 }
 
 function startLive(chosen,stake,total){
+  simulationId++;
+  if(nextTimer){clearTimeout(nextTimer);nextTimer=null;}
   const grouped=chosen.reduce((acc,p)=>{
     const k=p.league+'|'+p.gid;
     (acc[k] ||= []).push(p);
@@ -602,6 +605,7 @@ function startLive(chosen,stake,total){
 }
 
 function loadLiveMatch(){
+  if(!state)return;
   const s=state.games[state.index],g=s.g;
   if(timer)clearInterval(timer);
   if(s.intervalTimer){clearTimeout(s.intervalTimer);s.intervalTimer=null}
@@ -618,6 +622,7 @@ function loadLiveMatch(){
 }
 
 function tick(){
+  if(!state)return;
   const s=state.games[state.index];
   if(s.finished||s.interval)return;
   s.sec++;
@@ -704,6 +709,8 @@ function evaluateMatch(s){
 }
 
 function finishMatch(){
+  if(!state)return;
+  const thisSimulation=simulationId;
   const s=state.games[state.index];
   if(s.finished)return;
   s.finished=true;
@@ -711,14 +718,22 @@ function finishMatch(){
   const won=evaluateMatch(s);
   state.wonAll=state.wonAll&&won;
   document.getElementById('liveStatus').textContent='ENCERRADA';
+  const verified=s.chosen.filter(p=>evaluateMatch({...s,chosen:[p]})).length;
+  const recap='<br><small>Palpites certos nesta partida: '+verified+' de '+s.chosen.length+'.</small>';
   document.getElementById('final').innerHTML=won
-    ? '<div class="result">✅ <b>Partida acertada!</b><br>'+s.g[0]+' '+s.h+' × '+s.a+' '+s.g[1]+'</div>'
-    : '<div class="result" style="background:#4a2029;color:#ffc0c7">❌ <b>Partida não acertada.</b><br>'+s.g[0]+' '+s.h+' × '+s.a+' '+s.g[1]+'</div>';
+    ? '<div class="result">✅ <b>Partida acertada!</b><br>'+s.g[0]+' '+s.h+' × '+s.a+' '+s.g[1]+recap+'</div>'
+    : '<div class="result" style="background:#4a2029;color:#ffc0c7">❌ <b>Partida não acertada.</b><br>'+s.g[0]+' '+s.h+' × '+s.a+' '+s.g[1]+recap+'</div>';
 
   if(state.index<state.games.length-1){
-    setTimeout(()=>{state.index++;loadLiveMatch()},1500);
+    nextTimer=setTimeout(()=>{
+      nextTimer=null;
+      if(thisSimulation!==simulationId||!state)return;
+      state.index++;loadLiveMatch();
+    },1500);
   }else{
-    setTimeout(()=>{
+    nextTimer=setTimeout(()=>{
+      nextTimer=null;
+      if(thisSimulation!==simulationId||!state)return;
       const sAll=state;
       if(sAll.wonAll){
         document.getElementById('final').innerHTML='<div class="result">✅ <b>Você acertou todos os palpites!</b><br><small>O saldo do RoyalBet não foi alterado.</small></div>';
@@ -730,16 +745,18 @@ function finishMatch(){
 }
 
 function closeLiveModal(){
+  simulationId++;
   if(timer)clearInterval(timer);
   timer=null;
-  state?.games?.forEach(g=>{if(g.intervalTimer)clearTimeout(g.intervalTimer)});
+  if(nextTimer)clearTimeout(nextTimer);
+  nextTimer=null;
+  state?.games?.forEach(g=>{if(g.intervalTimer)clearTimeout(g.intervalTimer);g.intervalTimer=null});
+  state=null;
   document.getElementById('liveModal').classList.add('hidden');
 }
 
 function resetGame(){
-  if(timer){clearInterval(timer);timer=null;}
-  state?.games?.forEach(g=>{if(g.intervalTimer)clearTimeout(g.intervalTimer)});
-  state=null;
+  closeLiveModal(); // Encerra timers sem afetar os créditos do RoyalBet.
   picks=[];
   loadRoyalBalance(); // Reconsulta, sem zerar ou modificar a conta.
   renderSlip();
