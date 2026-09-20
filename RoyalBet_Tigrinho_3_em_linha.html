@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Royal Play - Cassino Virtual</title>
+<style>
+:root{--bg-color:#09090e;--panel-bg:rgba(20,20,35,.7);--primary:#8a2be2;--primary-hover:#9b4dff;--accent:#ffd700;--text-main:#fff;--text-muted:#a0a0b5;--danger:#ff3366;--success:#00ff88;--glass-border:rgba(255,255,255,.1);--neon-glow:0 0 15px rgba(138,43,226,.6)}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:Arial,sans-serif}
+body{background:var(--bg-color);color:var(--text-main);overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column}
+.glass{background:var(--panel-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:16px}
+.btn{background:var(--primary);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:var(--neon-glow);text-transform:uppercase;font-size:14px}.btn:hover{background:var(--primary-hover);transform:translateY(-2px)}.btn:active{transform:translateY(1px)}.btn-gold{background:linear-gradient(45deg,#b8860b,#ffd700);box-shadow:0 0 15px rgba(255,215,0,.4);color:#000}.btn-danger{background:var(--danger)}.btn-success{background:var(--success);color:#000}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}.hidden{display:none!important}.text-gold{color:var(--accent)}.text-success{color:var(--success)}.text-danger{color:var(--danger)}
+.demo-banner{background:var(--accent);color:#000;text-align:center;font-size:12px;font-weight:800;padding:5px;letter-spacing:1px}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid var(--glass-border);background:rgba(9,9,14,.9);position:sticky;top:0;z-index:999}.logo{font-size:24px;font-weight:800;display:flex;flex-direction:column;line-height:1.1;text-shadow:var(--neon-glow);color:var(--primary)}.logo span{font-size:10px;color:var(--text-muted);font-weight:400;text-shadow:none;letter-spacing:2px}.balance-container{display:flex;align-items:center;gap:15px}.balance-display{background:rgba(0,0,0,.5);padding:8px 15px;border-radius:20px;border:1px solid var(--accent);font-weight:600;display:flex;align-items:center;gap:8px}
+nav{display:flex;justify-content:center;gap:20px;padding:15px;background:rgba(0,0,0,.3);border-bottom:1px solid var(--glass-border)}.nav-item{cursor:pointer;padding:8px 16px;border-radius:8px;font-weight:600;color:var(--text-muted);transition:.3s;display:flex;align-items:center;gap:8px}.nav-item:hover,.nav-item.active{background:rgba(138,43,226,.2);color:#fff}
+main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}.view-section{animation:fadeIn .3s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.hero{text-align:center;padding:40px 20px;margin-bottom:30px;border-radius:20px;background:linear-gradient(135deg,rgba(138,43,226,.2),transparent)}.hero h1{font-size:36px;margin-bottom:10px;color:var(--accent)}.hero p{color:var(--text-muted);margin-bottom:20px}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}.game-card{padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:15px;transition:transform .3s}.game-card:hover{transform:translateY(-5px);border-color:var(--primary);box-shadow:var(--neon-glow)}.game-icon{font-size:60px}.game-card h3{font-size:20px}.game-card p{font-size:13px;color:var(--text-muted);flex:1}.game-card .btn{width:100%}
+.game-container{display:flex;gap:20px;height:600px;max-height:80vh}.game-sidebar{width:300px;padding:20px;display:flex;flex-direction:column;gap:15px}.game-area{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;overflow:hidden;background:#000;border-radius:16px;border:1px solid var(--glass-border);padding:20px}.input-group{display:flex;flex-direction:column;gap:5px}.input-group label{font-size:12px;color:var(--text-muted);text-transform:uppercase}.input-group input,.input-group select{background:rgba(0,0,0,.5);border:1px solid var(--glass-border);color:#fff;padding:12px;border-radius:8px;outline:none;font-size:16px;width:100%}.game-header-bar{width:100%;display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px;font-weight:600}
+.mine-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:400px;aspect-ratio:1}.mine-cell{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;transition:.2s;display:flex;justify-content:center;align-items:center;font-size:32px;box-shadow:inset 0 0 10px rgba(0,0,0,.5)}.mine-cell:hover:not(.revealed){background:rgba(255,255,255,.1);transform:scale(1.05);border-color:var(--primary)}.mine-cell.revealed{cursor:default;animation:popIn .3s}.mine-cell.diamond{background:rgba(0,255,136,.2);border-color:var(--success)}.mine-cell.bomb{background:rgba(255,51,102,.2);border-color:var(--danger)}@keyframes popIn{0%{transform:scale(0)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+.slot-machine{background:linear-gradient(135deg,#1b0c2e,#3b145b,#1b0c2e);padding:25px;border-radius:24px;border:3px solid var(--accent);box-shadow:0 0 40px rgba(255,215,0,.25),inset 0 0 20px rgba(138,43,226,.4);width:100%;max-width:460px;position:relative}.slot-machine:before{content:"🐯 FORTUNE TIGER 🐯";display:block;text-align:center;font-size:14px;font-weight:800;color:var(--accent);margin-bottom:15px;letter-spacing:2px}.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:rgba(0,0,0,.85);padding:15px;border-radius:14px}.slot-cell{height:90px;display:flex;justify-content:center;align-items:center;font-size:52px;background:linear-gradient(to bottom,rgba(255,255,255,.07),rgba(255,255,255,.02));border-radius:10px;border:1px solid rgba(255,255,255,.05)}.slot-cell.dim{filter:brightness(.25)}.slot-cell.win-highlight{animation:pulseWin .8s infinite;border:2px solid var(--accent);background:rgba(255,215,0,.25)}@keyframes pulseWin{0%{box-shadow:0 0 0 0 rgba(255,215,0,.7)}70%{box-shadow:0 0 0 15px rgba(255,215,0,0)}100%{box-shadow:0 0 0 0 rgba(255,215,0,0)}}
+.slot-overlay-msg{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;font-size:42px;font-weight:800;color:var(--accent);text-shadow:2px 2px 15px #000,0 0 20px var(--accent);pointer-events:none;z-index:20;opacity:0;transition:.3s}
+.penalty-stadium{width:100%;max-width:600px;aspect-ratio:16/9;background:linear-gradient(135deg,#0e2a18,#1a472a 50%,#11351e);position:relative;border-radius:16px;overflow:hidden;border:3px solid rgba(255,255,255,.2)}.penalty-stadium:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,255,255,.08),transparent 70%),repeating-linear-gradient(0deg,transparent 0,transparent 35px,rgba(255,255,255,.03) 36px,rgba(255,255,255,.03) 70px)}.goal-frame{position:absolute;top:5%;left:15%;right:15%;height:55%;border:6px solid #fff;border-bottom:none;border-radius:8px 8px 0 0;background:rgba(255,255,255,.03)}.goal-net{position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent 0,transparent 12px,rgba(255,255,255,.12) 13px,rgba(255,255,255,.12) 14px),repeating-linear-gradient(-45deg,transparent 0,transparent 12px,rgba(255,255,255,.12) 13px,rgba(255,255,255,.12) 14px)}.target-zones{position:absolute;top:5%;left:15%;right:15%;height:55%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:6px;padding:8px;z-index:20}.target-zone{border:2px dashed rgba(255,255,255,.4);border-radius:8px;cursor:pointer;transition:.2s;background:rgba(0,255,136,.03)}.target-zone:hover{background:rgba(0,255,136,.25);border-color:var(--success);transform:scale(1.03)}.ball{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);font-size:34px;transition:all .4s cubic-bezier(.25,.46,.45,.94);z-index:30}.goalkeeper{position:absolute;top:25%;left:50%;transform:translateX(-50%);font-size:55px;transition:all .3s ease;z-index:25}.penalty-mult-bar{display:flex;justify-content:space-between;width:100%;max-width:600px;margin-top:15px;background:rgba(0,0,0,.6);padding:10px;border-radius:10px}.penalty-step{opacity:.4;font-weight:bold;font-size:12px;text-align:center;flex:1;border-right:1px solid rgba(255,255,255,.1)}.penalty-step:last-child{border:0}.penalty-step.active{opacity:1;color:var(--accent)}.penalty-step.done{opacity:1;color:var(--success)}
+.crash-area{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}.crash-multiplier{font-size:80px;font-weight:800;color:#fff;text-shadow:0 0 20px rgba(255,255,255,.5);z-index:10}.crash-multiplier.crashed{color:var(--danger);text-shadow:0 0 20px var(--danger)}.plane-container{position:absolute;bottom:20px;left:20px;transition:all .1s linear;z-index:5}.plane{font-size:40px}.crash-history-strip{width:100%;display:flex;gap:8px;overflow-x:auto;padding:10px;background:rgba(0,0,0,.3);border-radius:8px;margin-bottom:20px;scrollbar-width:none}.crash-hist-badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:bold;background:rgba(255,255,255,.1);white-space:nowrap}.crash-hist-badge.high{color:var(--accent);background:rgba(255,215,0,.2);border:1px solid var(--accent)}.crash-hist-badge.low{color:var(--danger)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(5px);display:flex;justify-content:center;align-items:center;z-index:9999}.modal-content{width:90%;max-width:400px;padding:30px;text-align:center;position:relative}.modal-close{position:absolute;top:15px;right:15px;cursor:pointer;font-size:20px;color:var(--text-muted)}.coin-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.history-table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px}.history-table th,.history-table td{padding:12px;text-align:left;border-bottom:1px solid var(--glass-border)}.history-table th{color:var(--text-muted);font-size:12px}.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.help-card{padding:20px;background:rgba(0,0,0,.3);border-radius:12px;border:1px solid var(--glass-border)}.help-card h3{color:var(--accent);margin-bottom:10px}
+@media(max-width:768px){.game-container{flex-direction:column-reverse;height:auto;max-height:none}.game-sidebar{width:100%;border-top:1px solid var(--glass-border);border-radius:0 0 16px 16px}.game-area{border-radius:16px 16px 0 0;min-height:350px}nav{position:fixed;bottom:0;left:0;right:0;z-index:990;background:rgba(9,9,14,.95);border-top:1px solid var(--glass-border);border-bottom:0;padding:10px;gap:5px;justify-content:space-around}.nav-item{flex-direction:column;font-size:10px;padding:5px;gap:4px}main{padding-bottom:80px}.help-grid{grid-template-columns:1fr}.crash-multiplier{font-size:60px}header{flex-direction:column;gap:10px}.balance-container{width:100%;justify-content:center;flex-wrap:wrap}}
+
+    .auth-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #080808;
+    padding: 20px;
+}
+
+.auth-screen.hidden {
+    display: none !important;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 400px;
+
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 20px;
+
+    padding: 30px;
+
+    text-align: center;
+}
+
+.auth-box h1 {
+    margin-bottom: 10px;
+}
+
+.auth-box input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 14px;
+    margin-top: 12px;
+
+    border-radius: 10px;
+    border: 1px solid #444;
+
+    background: #1b1b1b;
+    color: white;
+}
+
+.auth-box button {
+    width: 100%;
+
+    padding: 14px;
+    margin-top: 12px;
+
+    border: none;
+    border-radius: 10px;
+
+    cursor: pointer;
+}
+
+.auth-box p {
+    color: #aaa;
+}
+
+#auth-message {
+    margin-top: 15px;
+}
+
+#app.hidden {
+    display: none !important;
+}
+    
+.auth-tabs{display:flex;gap:8px;margin:22px 0 16px}.auth-tabs button{flex:1;background:#242032;color:#ddd;border:1px solid #49405b}.auth-tabs button.selected{background:#8a2be2;color:white;border-color:#aa75f5}.auth-label{display:block;text-align:left;font-size:12px;color:#ccc;margin-top:14px}.auth-box .auth-primary{background:#8a2be2;color:#fff;font-weight:800}.auth-box .auth-secondary{background:transparent;border:1px solid #555;color:#ddd}.auth-box #auth-message{min-height:22px;font-size:13px;line-height:1.4}.auth-box h1{color:#ffd700;font-size:32px}
+</style>
+</head>
+<body>
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-box">
+    <h1>RoyalBet</h1>
+    <p>Jogo fictício • somente moedas virtuais</p>
+    <div class="auth-tabs" role="group" aria-label="Acesso à conta">
+      <button type="button" id="tab-login" class="selected" onclick="Auth.setMode('login')">ENTRAR</button>
+      <button type="button" id="tab-register" onclick="Auth.setMode('register')">CRIAR CONTA</button>
+    </div>
+    <label class="auth-label" for="auth-email">E-mail</label>
+    <input id="auth-email" type="email" autocomplete="email" placeholder="Seu e-mail">
+    <label class="auth-label" for="auth-password">Senha</label>
+    <input id="auth-password" type="password" autocomplete="current-password" placeholder="Sua senha">
+    <div id="register-fields" class="hidden">
+      <label class="auth-label" for="auth-confirm">Confirmar senha</label>
+      <input id="auth-confirm" type="password" autocomplete="new-password" placeholder="Repita sua senha">
+    </div>
+    <button type="button" id="auth-submit" class="auth-primary" onclick="Auth.submit()">ENTRAR</button>
+    <button type="button" id="forgot-button" class="auth-secondary" onclick="Auth.forgotPassword()">Esqueci minha senha</button>
+    <p id="auth-message" role="status" aria-live="polite"></p>
+  </div>
+</div>
+<div id="recovery-screen" class="auth-screen hidden">
+  <div class="auth-box">
+    <h1>CRIAR NOVA SENHA</h1>
+    <p>Digite sua nova senha para recuperar a conta.</p>
+    <input id="recovery-password" type="password" autocomplete="new-password" minlength="6" placeholder="Nova senha (mínimo 6 caracteres)">
+    <input id="recovery-confirm" type="password" autocomplete="new-password" minlength="6" placeholder="Confirme a nova senha">
+    <button type="button" id="recovery-submit" onclick="Auth.saveNewPassword()">SALVAR NOVA SENHA</button>
+    <p id="recovery-message" role="status" aria-live="polite"></p>
+  </div>
+</div>
+<div id="app" class="hidden">
+<div class="demo-banner">🎰 ROYAL PLAY MODO DEMONSTRAÇÃO — CRÉDITOS SEM VALOR REAL 🎰</div>
+<header>
+<div class="logo">RoyalBet<span>JOGO FICTÍCIO</span></div>
+<div class="balance-container">
+<div class="balance-display">💰 <span id="global-balance">10,000.00</span></div>
+<button class="btn btn-gold" onclick="UI.showModal('add-coins-modal')">+ MOEDAS</button>
+<button class="btn" style="padding:8px;background:rgba(255,255,255,.1)" onclick="Sys.toggleSound()" id="sound-btn">🔊</button>
+<button class="btn btn-danger" type="button" onclick="Auth.logout()">SAIR DA CONTA</button>
+</div>
+</header>
+<nav>
+<div class="nav-item active" onclick="UI.nav('home')">🏠 <span>Início</span></div>
+<div class="nav-item" onclick="UI.nav('games')">🎮 <span>Jogos</span></div>
+<div class="nav-item" onclick="UI.nav('history')">📜 <span>Histórico</span></div>
+<div class="nav-item" onclick="UI.nav('help')">ℹ️ <span>Como jogar</span></div>
+<div class="nav-item text-danger" onclick="Sys.resetDemo()">🔄 <span>Reset</span></div>
+</nav>
+<main>
+<div id="view-home" class="view-section">
+<div class="hero glass"><h1>Bem-vindo ao Royal Play</h1><p>Divirta-se com seus créditos virtuais sem nenhum risco.</p><button class="btn btn-gold" style="font-size:18px" onclick="UI.nav('games')">JOGAR AGORA</button></div>
+<h2 style="margin-bottom:20px">Jogos em Destaque</h2>
+<div class="games-grid">
+<div class="game-card glass"><div class="game-icon">💣</div><h3>Mine Bomber</h3><p>Campo minado de diamantes. Escolha o risco.</p><button class="btn" onclick="UI.loadGame('mines')">JOGAR</button></div>
+<div class="game-card glass"><div class="game-icon">🐯</div><h3>Tiger Treasure</h3><p>Slot 3x3 com prêmios e combinações.</p><button class="btn" onclick="UI.loadGame('slots')">JOGAR</button></div>
+<div class="game-card glass"><div class="game-icon">⚽</div><h3>Penalty Clash</h3><p>Bata pênaltis, engane o goleiro e multiplique.</p><button class="btn" onclick="UI.loadGame('penalty')">JOGAR</button></div>
+<div class="game-card glass"><div class="game-icon">✈️</div><h3>Sky Crash</h3><p>Saque seus lucros antes que o avião caia.</p><button class="btn" onclick="UI.loadGame('crash')">JOGAR</button></div>
+</div></div>
+
+<div id="view-games" class="view-section hidden"><h2 style="margin-bottom:20px">Todos os Jogos</h2><div class="games-grid">
+<div class="game-card glass"><div class="game-icon">💣</div><h3>Mine Bomber</h3><button class="btn" onclick="UI.loadGame('mines')">JOGAR</button></div>
+<div class="game-card glass"><div class="game-icon">🐯</div><h3>Tiger Treasure</h3><button class="btn" onclick="UI.loadGame('slots')">JOGAR</button></div>
+<div class="game-card glass"><div class="game-icon">⚽</div><h3>Penalty Clash</h3><button class="btn" onclick="UI.loadGame('penalty')">JOGAR</button></div>
+<div class="game-card glass"><div class="game-icon">✈️</div><h3>Sky Crash</h3><button class="btn" onclick="UI.loadGame('crash')">JOGAR</button></div>
+</div></div>
+
+<div id="game-mines" class="view-section hidden glass game-container"><div class="game-sidebar">
+<div class="game-header-bar"><span>💣 Mine Bomber</span><span id="mines-mult-display" class="text-gold">1.00x</span></div>
+<div class="input-group"><label>Aposta (Moedas)</label><input type="number" id="mines-bet" value="100" min="1"></div>
+<div class="input-group"><label>Quantidade de Bombas</label><select id="mines-bombs"><option value="1">1 Bomba</option><option value="3" selected>3 Bombas</option><option value="5">5 Bombas</option><option value="12">12 Bombas</option><option value="20">20 Bombas</option><option value="24">24 Bombas (Insano)</option></select></div>
+<button class="btn btn-gold" id="mines-btn-bet" onclick="Mines.start()">APOSTAR</button><button class="btn btn-success hidden" id="mines-btn-cashout" onclick="Mines.cashout()">COLETAR</button>
+<div id="mines-msg" style="text-align:center;font-size:14px;margin-top:10px"></div></div><div class="game-area"><div class="mine-grid" id="mines-grid"></div></div></div>
+
+<div id="game-slots" class="view-section hidden glass game-container"><div class="game-sidebar">
+<div class="game-header-bar"><span>🐯 Tiger Treasure</span></div><div class="input-group"><label>Aposta (Moedas)</label><input type="number" id="slots-bet" value="100" min="1"></div>
+<button class="btn btn-gold" id="slots-btn-spin" style="padding:20px;font-size:20px" onclick="Slots.spin()">GIRAR 🎰</button>
+<div style="background:rgba(0,0,0,.5);padding:10px;border-radius:8px;font-size:12px;margin-top:auto"><p class="text-gold" style="text-align:center;margin-bottom:5px">Tabela de Pagamentos — 3 iguais em linha</p>
+<div style="display:flex;justify-content:space-between"><span>🐯🐯🐯</span><span>50x</span></div><div style="display:flex;justify-content:space-between"><span>💎💎💎</span><span>20x</span></div><div style="display:flex;justify-content:space-between"><span>🪙🪙🪙</span><span>10x</span></div><div style="display:flex;justify-content:space-between"><span>🧧🧧🧧</span><span>8x</span></div><div style="display:flex;justify-content:space-between"><span>🍊🍊🍊</span><span>5x</span></div></div></div>
+<div class="game-area"><div class="slot-machine"><div class="slot-grid" id="slots-grid"></div></div><div id="slots-msg" class="slot-overlay-msg">GANHOU!</div></div></div>
+
+<div id="game-penalty" class="view-section hidden glass penalty-clash-wrap">
+<style>
+.penalty-clash-wrap{padding:12px;background:rgba(10,14,23,.92);border:1px solid #1e2d4a;border-radius:16px}.pc{max-width:900px;margin:auto;color:#f8fafc;font-family:Segoe UI,system-ui,sans-serif}.pc-head,.pc-status,.pc-controls,.pc-history{background:rgba(18,26,43,.9);border:1px solid #1e2d4a;border-radius:12px;padding:12px 16px;margin-bottom:12px}.pc-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.pc-brand{font-size:1.5rem;font-weight:900;font-style:italic;background:linear-gradient(135deg,#22c55e,#eab308);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.pc-stats{display:flex;gap:8px;align-items:center}.pc-stat{background:rgba(0,0,0,.4);padding:6px 12px;border-radius:8px;text-align:right}.pc-label{font-size:.65rem;color:#94a3b8;text-transform:uppercase}.pc-value{font-size:1.1rem;font-weight:700;color:#eab308}.pc-icons{display:flex;gap:6px}.pc-icon{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:8px;cursor:pointer}.pc-status{display:flex;justify-content:space-between;align-items:center;gap:10px}.pc-mults{display:flex;gap:6px;overflow:auto}.pc-mult{padding:4px 8px;border-radius:6px;font-size:.8rem;font-weight:700;color:#94a3b8;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}.pc-mult.active{background:#eab308;color:#000}.pc-mult.done{color:#22c55e;border-color:#22c55e}.pc-arena{position:relative;width:100%;aspect-ratio:16/10;background:#000;border:2px solid #1e2d4a;border-radius:12px;overflow:hidden;margin-bottom:12px}.pc-arena canvas{width:100%;height:100%;display:block}.pc-zones{position:absolute;top:16%;left:20%;width:60%;height:42%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;z-index:10;pointer-events:none}.pc-zones.active{pointer-events:auto}.pc-zone{background:rgba(34,197,94,.15);border:2px dashed rgba(34,197,94,.5);border-radius:8px;color:#fff;font-weight:800;font-size:.75rem;cursor:pointer;opacity:0;transition:.2s}.pc-zones.active .pc-zone{opacity:1}.pc-zone:hover{background:rgba(34,197,94,.4);border-color:#fff}.pc-tl{grid-column:1;grid-row:1}.pc-bl{grid-column:1;grid-row:2}.pc-c{grid-column:2;grid-row:1/span 2;margin:10% 0}.pc-tr{grid-column:3;grid-row:1}.pc-br{grid-column:3;grid-row:2}.pc-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);background:rgba(10,14,23,.96);border:2px solid #eab308;padding:20px 30px;border-radius:16px;text-align:center;z-index:20;opacity:0;pointer-events:none;transition:.3s}.pc-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1)}.pc-popup h2{font-size:2rem;margin-bottom:8px}.pc-popup p{color:#94a3b8}.pc-controls{display:flex;flex-direction:column;gap:12px}.pc-inputs{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.pc-input{flex:1;min-width:180px}.pc-input label{display:block;font-size:.75rem;color:#94a3b8;margin-bottom:4px}.pc-input input{width:100%;background:rgba(0,0,0,.5);border:1px solid #1e2d4a;border-radius:8px;padding:10px;color:#eab308;font-size:1.1rem;font-weight:700}.pc-quick{display:flex;gap:6px;flex-wrap:wrap}.pc-quick button,.pc-action{border:0;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer}.pc-quick button{background:rgba(255,255,255,.08);color:#fff}.pc-actions{display:flex;gap:10px}.pc-action{flex:1;font-size:1rem}.pc-start{background:#22c55e;color:#000}.pc-cash{background:#eab308;color:#000;display:none}.pc-cont{background:#3b82f6;color:#fff;display:none}.pc-history{display:flex;align-items:center;gap:10px}.pc-history-list{display:flex;gap:8px;overflow:auto}.pc-history-item{padding:4px 10px;border-radius:6px;font-size:.75rem;font-weight:700;white-space:nowrap}.pc-win{color:#22c55e;border:1px solid #22c55e;background:rgba(34,197,94,.15)}.pc-loss{color:#ef4444;border:1px solid #ef4444;background:rgba(239,68,68,.15)}.pc-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:10000;opacity:0;pointer-events:none}.pc-modal.active{opacity:1;pointer-events:auto}.pc-modal-card{background:#121a2b;border:1px solid #1e2d4a;border-radius:16px;max-width:500px;padding:24px;margin:16px}.pc-modal-card h3{color:#eab308;margin-bottom:12px}.pc-modal-card li{margin:8px 0}.pc-modal-close{width:100%;padding:10px;border:0;border-radius:8px;background:#3b82f6;color:#fff;font-weight:700;margin-top:10px}@media(max-width:600px){.pc-status{flex-direction:column;align-items:flex-start}.pc-brand{font-size:1.2rem}.pc-actions{flex-direction:column}}
+</style>
+<div class="pc">
+<div class="pc-head"><div class="pc-brand">PENALTY CLASH</div><div class="pc-stats"><div class="pc-stat"><div class="pc-label">Saldo do Royal Play</div><div class="pc-value" id="pc-credits">10.000 CR</div></div><div class="pc-icons"><button class="pc-icon" id="pc-sound">🔊</button><button class="pc-icon" id="pc-rules">❓</button><button class="pc-icon" id="pc-reset">🔄</button></div></div></div>
+<div class="pc-status"><div id="pc-tracker">PÊNALTI: 1/5</div><div class="pc-mults"><span class="pc-mult" id="pc-m1">1x 1,92x</span><span class="pc-mult" id="pc-m2">2x 3,84x</span><span class="pc-mult" id="pc-m3">3x 7,68x</span><span class="pc-mult" id="pc-m4">4x 15,36x</span><span class="pc-mult" id="pc-m5">5x 30,72x</span></div></div>
+<div class="pc-arena"><canvas id="pc-canvas" width="800" height="500"></canvas><div class="pc-zones" id="pc-zones"><button class="pc-zone pc-tl" onclick="Penalty.shootZone('TL')">CANTO SUP. ESQ.</button><button class="pc-zone pc-bl" onclick="Penalty.shootZone('BL')">CANTO INF. ESQ.</button><button class="pc-zone pc-c" onclick="Penalty.shootZone('C')">CENTRO</button><button class="pc-zone pc-tr" onclick="Penalty.shootZone('TR')">CANTO SUP. DIR.</button><button class="pc-zone pc-br" onclick="Penalty.shootZone('BR')">CANTO INF. DIR.</button></div><div class="pc-popup" id="pc-popup"><h2 id="pc-popup-title">GOL!</h2><p id="pc-popup-sub"></p></div></div>
+<div class="pc-controls"><div class="pc-inputs"><div class="pc-input"><label>Valor da Rodada (Créditos)</label><input type="number" id="penalty-bet" value="100" min="10" step="10"></div><div class="pc-quick"><button onclick="Penalty.setBet(50)">50</button><button onclick="Penalty.setBet(100)">100</button><button onclick="Penalty.setBet(500)">500</button><button onclick="Penalty.setBet(1000)">1000</button><button onclick="Penalty.setMaxBet()">MAX</button></div></div><div class="pc-actions"><button class="pc-action pc-start" id="pc-start" onclick="Penalty.start()">INICIAR RODADA</button><button class="pc-action pc-cash" id="pc-cash" onclick="Penalty.cashout()">COLETAR (<span id="pc-cash-val">0</span> CR)</button><button class="pc-action pc-cont" id="pc-cont" onclick="Penalty.nextPenalty()">CONTINUAR CHUTANDO</button></div></div>
+<div class="pc-history"><strong>Histórico:</strong><div class="pc-history-list" id="pc-history"></div></div></div>
+<div class="pc-modal" id="pc-modal"><div class="pc-modal-card"><h3>Como Jogar Penalty Clash</h3><ul><li>Jogo 100% fictício, com créditos virtuais.</li><li>Escolha a aposta e inicie a rodada.</li><li>São até 5 cobranças.</li><li>Escolha uma das 5 zonas do gol.</li><li>Os multiplicadores são 1,92x, 3,84x, 7,68x, 15,36x e 30,72x.</li><li>Após um gol, você pode coletar ou continuar.</li><li>Se o goleiro defender, a rodada termina.</li></ul><button class="pc-modal-close" onclick="Penalty.toggleRules()">Entendi</button></div></div>
+</div>
+
+<div id="game-crash" class="view-section hidden glass game-container"><div class="game-sidebar">
+<div class="game-header-bar"><span>✈️ Sky Crash</span></div><div class="input-group"><label>Aposta (Moedas)</label><input type="number" id="crash-bet" value="100" min="1"></div>
+<button class="btn btn-gold" id="crash-btn-bet" onclick="Crash.toggleBet()" style="padding:20px;font-size:18px">APOSTAR</button><div id="crash-msg" style="text-align:center;margin-top:10px;color:var(--text-muted);font-size:14px">Aguardando aposta...</div></div>
+<div class="game-area"><div class="crash-history-strip" id="crash-history-strip"></div><div class="crash-area"><div class="crash-multiplier" id="crash-mult">1.00x</div><div class="plane-container" id="crash-plane"><div class="plane">✈️</div></div></div></div></div>
+
+<div id="view-history" class="view-section hidden glass" style="padding:30px"><h2>📜 Histórico de Jogadas</h2><p style="margin-bottom:20px;color:var(--text-muted)">Suas últimas 50 partidas, salvas na sua conta.</p><div style="overflow-x:auto"><table class="history-table"><thead><tr><th>Horário</th><th>Jogo</th><th>Aposta</th><th>Mult.</th><th>Prêmio</th><th>Resultado</th></tr></thead><tbody id="history-tbody"></tbody></table></div><div id="history-empty" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhuma jogada registrada ainda.</div></div>
+
+<div id="view-help" class="view-section hidden glass" style="padding:30px"><h2 style="margin-bottom:20px">ℹ️ Como Jogar (Modo Demo)</h2><div class="help-grid">
+<div class="help-card"><h3>💣 Mine Bomber</h3><p>Defina sua aposta e o número de bombas. Clique nos quadrados para revelar diamantes. Cada diamante aumenta o multiplicador. Clique em Coletar para garantir o prêmio. Se encontrar uma bomba, a rodada termina.</p></div>
+<div class="help-card"><h3>🐯 Tiger Treasure</h3><p>Gire a grade 3x3. Só vale uma linha completa de três símbolos idênticos: horizontal, vertical ou diagonal (8 possibilidades). O tigre não substitui outros símbolos. Apenas créditos fictícios.</p></div>
+<div class="help-card"><h3>⚽ Penalty Clash</h3><p>Faça a aposta e clique em uma das 6 zonas do gol para chutar. Se fizer gol, o multiplicador aumenta. Você pode coletar a qualquer momento após um gol.</p></div>
+<div class="help-card"><h3>✈️ Sky Crash</h3><p>Faça uma aposta e clique em APOSTAR. O avião decola e o multiplicador sobe. Clique em PARAR / COLETAR antes do Crash para garantir seus lucros.</p></div>
+</div><div style="margin-top:20px;text-align:center;color:var(--text-muted);font-size:12px">* Todas as moedas são fictícias. Não é possível depositar ou sacar dinheiro real.</div></div>
+</main>
+
+<div id="add-coins-modal" class="modal-overlay hidden"><div class="modal-content glass"><span class="modal-close" onclick="UI.hideModal('add-coins-modal')">×</span><h2 class="text-gold">Adicionar Créditos</h2><p style="font-size:12px;color:var(--text-muted);margin-bottom:15px">Apenas moedas virtuais. Sem valor real.</p><div class="coin-options">
+<button class="btn" onclick="Sys.addCoins(100)">+ 100</button><button class="btn" onclick="Sys.addCoins(500)">+ 500</button><button class="btn" onclick="Sys.addCoins(1000)">+ 1.000</button><button class="btn" onclick="Sys.addCoins(5000)">+ 5.000</button><button class="btn btn-gold" style="grid-column:span 2" onclick="Sys.addCoins(10000)">+ 10.000</button>
+</div></div></div>
+</div><!-- fim do app -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = "https://egerudplakshmjpcvvws.supabase.co";
+const SUPABASE_KEY = "sb_publishable_3jlJ296WNi59RcUEsm4WBA_4lz_HiQU";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const Auth = {
+    mode: 'login',
+    setMode(mode) {
+      this.mode = mode;
+      document.getElementById('register-fields').classList.toggle('hidden', mode !== 'register');
+      document.getElementById('forgot-button').classList.toggle('hidden', mode !== 'login');
+      document.getElementById('tab-login').classList.toggle('selected', mode === 'login');
+      document.getElementById('tab-register').classList.toggle('selected', mode === 'register');
+      document.getElementById('auth-submit').textContent = mode === 'login' ? 'ENTRAR' : 'CRIAR CONTA';
+      document.getElementById('auth-password').setAttribute('autocomplete', mode === 'login' ? 'current-password' : 'new-password');
+      this.message('');
+    },
+    async submit() { return this.mode === 'login' ? this.login() : this.register(); },
+    async register() {
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const confirmation = document.getElementById('auth-confirm').value;
+      if (!email || !password || !confirmation) { this.message('Preencha todos os campos.'); return; }
+      if (!document.getElementById('auth-email').checkValidity()) { this.message('Digite um e-mail válido.'); return; }
+      if (password.length < 6) { this.message('A senha precisa ter pelo menos 6 caracteres.'); return; }
+      if (password !== confirmation) { this.message('As senhas não são iguais.'); return; }
+      const button = document.getElementById('auth-submit');
+      button.disabled = true;
+      this.message('Criando conta...');
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) {
+          // O Supabase pode informar explicitamente que o usuário já existe,
+          // mas também pode ocultar essa informação para proteger a privacidade.
+          if (/already registered|already exists|user already registered/i.test(error.message || '')) {
+            this.message('Esse e-mail já está cadastrado. Entre ou recupere sua senha.');
+          } else { this.message('Não foi possível criar a conta: ' + error.message); }
+          return;
+        }
+        if (data.session) {
+          await this.showApp();
+        } else {
+          this.message('Se este e-mail puder ser cadastrado, confira a caixa de entrada para confirmar a conta. Se você já possui uma conta, use Entrar ou Esqueci minha senha.');
+        }
+      } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
+      finally { button.disabled = false; }
+    },
+    async login() {
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      if (!email || !password) { this.message('Preencha o e-mail e a senha.'); return; }
+      const button = document.getElementById('auth-submit');
+      button.disabled = true;
+      this.message('Entrando...');
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) {
+          if (/email not confirmed/i.test(error.message || '')) this.message('Confirme seu e-mail antes de entrar.');
+          else this.message('E-mail ou senha incorretos. Confira os dados ou use Esqueci minha senha.');
+          return;
+        }
+        await this.showApp();
+      } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
+      finally { button.disabled = false; }
+    },
+    async forgotPassword() {
+      const email = document.getElementById('auth-email').value.trim();
+      if (!email || !document.getElementById('auth-email').checkValidity()) { this.message('Digite um e-mail válido primeiro.'); return; }
+      this.message('Solicitando recuperação...');
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://vinizaoproclubs-bit.github.io/RoyalBet-Completo/index.html'
+        });
+        if (error) { this.message('Não foi possível enviar agora. Aguarde e tente novamente.'); return; }
+        this.message('Se o e-mail estiver cadastrado, você receberá um link. Confira também o spam.');
+      } catch (e) { this.message('Falha de conexão. Tente novamente.'); }
+    },
+    showRecovery() {
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('recovery-screen').classList.remove('hidden');
+    },
+    async saveNewPassword() {
+      const password = document.getElementById('recovery-password').value;
+      const confirmation = document.getElementById('recovery-confirm').value;
+      const message = document.getElementById('recovery-message');
+      const button = document.getElementById('recovery-submit');
+      if (password.length < 6) { message.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
+      if (password !== confirmation) { message.textContent = 'As senhas não são iguais.'; return; }
+      button.disabled = true;
+      message.textContent = 'Salvando nova senha...';
+      try {
+        const { error } = await supabaseClient.auth.updateUser({ password });
+        if (error) { message.textContent = 'Não foi possível alterar a senha. Solicite um novo link se ele expirou.'; return; }
+        await supabaseClient.auth.signOut();
+        recoveringPassword = false;
+        history.replaceState(null, '', location.pathname + location.search);
+        document.getElementById('recovery-screen').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
+        this.setMode('login');
+        this.message('Senha alterada! Entre com sua nova senha.');
+      } catch (e) { message.textContent = 'Falha de conexão. Tente novamente.'; }
+      finally { button.disabled = false; }
+    },
+    async logout() {
+      try {
+        await Sys.queue;
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) { alert('Não foi possível sair. Tente novamente.'); return; }
+        location.reload();
+      } catch (e) { alert('Falha de conexão ao sair. Tente novamente.'); }
+    },
+    message(text) { document.getElementById('auth-message').textContent = text; },
+    async showApp() {
+      const {data:{user},error}=await supabaseClient.auth.getUser();
+      if(error||!user)throw error||Error('Sem usuário');
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('recovery-screen').classList.add('hidden');
+      document.getElementById('app').classList.add('hidden');
+      try {await Sys.load(user);document.getElementById('app').classList.remove('hidden');}
+      catch(e){console.error(e);document.getElementById('auth-screen').classList.remove('hidden');this.message('Não foi possível carregar seu saldo. Execute o SQL no Supabase e atualize a página.');}
+    }
+  };
+const AudioSys={ctx:null,enabled:localStorage.getItem('rp_sound')!=='false',init(){if(!this.ctx){try{window.AudioContext=window.AudioContext||window.webkitAudioContext;this.ctx=new AudioContext()}catch(e){}}const b=document.getElementById('sound-btn');if(b)b.innerText=this.enabled?'🔊':'🔇'},toggle(){this.enabled=!this.enabled;localStorage.setItem('rp_sound',this.enabled);this.init();if(this.enabled&&this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},play(type){if(!this.enabled||!this.ctx)return;try{const o=this.ctx.createOscillator(),g=this.ctx.createGain(),n=this.ctx.currentTime;o.connect(g);g.connect(this.ctx.destination);let f=type==='win'?800:type==='lose'?300:type==='coin'?1200:type==='explosion'?100:type==='spin'?200:type==='tick'?150:600;o.type=type==='lose'||type==='explosion'?'sawtooth':type==='tick'?'square':'sine';o.frequency.setValueAtTime(f,n);g.gain.setValueAtTime(.08,n);g.gain.exponentialRampToValueAtTime(.01,n+.3);o.start(n);o.stop(n+.3)}catch(e){}}};
+
+// Saldo e histórico pertencem à conta autenticada, nunca ao navegador.
+const Sys={
+ balance:10000,history:[],ready:false,userId:null,queue:Promise.resolve(),pending:0,
+ renderBalance(){const v=Number(this.balance);const txt=v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});const e=document.getElementById('global-balance');if(e)e.innerText=txt;const pc=document.getElementById('pc-credits');if(pc)pc.innerText=v.toLocaleString('pt-BR',{maximumFractionDigits:0})+' CR'},
+ async load(user){
+  this.ready=false;this.userId=user.id;this.balance=10000;this.history=[];this.renderBalance();UI.renderHistory();
+  const {data:profile,error:initError}=await supabaseClient.rpc('royal_get_profile');
+  if(initError)throw initError;
+  const {data:history,error:historyError}=await supabaseClient.from('royal_game_history').select('played_at,game,bet,mult,prize,result').order('played_at',{ascending:false}).limit(50);
+  if(historyError)throw historyError;
+  this.balance=Number(profile.balance);this.history=(history||[]).map(h=>({time:new Date(h.played_at).toLocaleString('pt-BR'),game:h.game,bet:Number(h.bet),mult:h.mult,prize:Number(h.prize),result:h.result}));
+  this.renderBalance();UI.renderHistory();this.ready=true;
+ },
+ enqueue(job){const id=this.userId;this.pending++;this.queue=this.queue.then(async()=>{if(id!==this.userId)throw Error('Conta alterada');return await job()}).catch(e=>{this.ready=false;console.error('Erro ao salvar dados da conta:',e);alert('Falha ao salvar os dados no Supabase. O jogo foi bloqueado para evitar perda de saldo. Atualize a página e confira sua conexão.');}).finally(()=>{this.pending--});return this.queue},
+ updateBalance(amount){const delta=Math.round(Number(amount)*100)/100;if(!this.ready||!Number.isFinite(delta)){alert('Aguarde os dados da conta carregarem.');return}this.balance=Math.max(0,Math.round((this.balance+delta)*100)/100);this.renderBalance();this.enqueue(async()=>{const {data,error}=await supabaseClient.rpc('royal_change_balance',{p_delta:delta});if(error)throw error;if(this.pending===1){this.balance=Number(data);this.renderBalance()}})},
+ checkBalance(amount){const n=Number(amount);if(!this.ready){alert('Aguarde a sincronização da conta.');return false}if(!Number.isFinite(n)||n<=0){alert('Valor inválido.');return false}if(n>this.balance){alert('Saldo insuficiente.');return false}return true},
+ addHistory(game,bet,mult,prize,result){if(!this.ready)return;const h={time:new Date().toLocaleTimeString('pt-BR'),game,bet:Number(bet),mult:String(mult),prize:Number(prize),result};this.history.unshift(h);this.history=this.history.slice(0,50);UI.renderHistory();this.enqueue(async()=>{const {error}=await supabaseClient.from('royal_game_history').insert({user_id:this.userId,game,bet:Number(bet),mult:String(mult),prize:Number(prize),result});if(error)throw error})},
+ addCoins(amount){if(!this.checkBalance(0.01))return;const n=Number(amount);if(!Number.isFinite(n)||n<=0){alert('Valor inválido.');return}AudioSys.init();AudioSys.play('coin');this.updateBalance(n);UI.hideModal('add-coins-modal')},
+ resetDemo(){if(!this.ready)return;if(!confirm('Reiniciar o saldo DESTA CONTA para 10.000 moedas e apagar todo o histórico dela?'))return;this.ready=false;this.enqueue(async()=>{const {data,error}=await supabaseClient.rpc('royal_reset_account');if(error)throw error;this.balance=Number(data);this.history=[];this.renderBalance();UI.renderHistory();UI.nav('home');this.ready=true})},
+ toggleSound(){AudioSys.init();AudioSys.toggle()}
+};
+
+const UI={views:['home','games','history','help','game-mines','game-slots','game-penalty','game-crash'],nav(id){try{AudioSys.init();AudioSys.play('click')}catch(e){};this.views.forEach(v=>{const e=document.getElementById(v.startsWith('game-')?v:`view-${v}`);if(e)e.classList.add('hidden')});document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const t=document.getElementById(id.startsWith('game-')?id:`view-${id}`);if(!t)return;t.classList.remove('hidden');if(['home','games','history','help'].includes(id)){document.querySelectorAll('.nav-item').forEach(e=>{const s=e.innerText.toLowerCase();if((id==='home'&&s.includes('início'))||(id==='games'&&s.includes('jogos'))||(id==='history'&&s.includes('histórico'))||(id==='help'&&s.includes('como jogar')))e.classList.add('active')})}if(id==='game-mines'&&typeof Mines!=='undefined'&&!Mines.playing)Mines.initUI();if(id==='game-slots'&&typeof Slots!=='undefined'&&!Slots.spinning)Slots.initUI();if(id==='game-penalty'&&typeof Penalty!=='undefined'){if(!Penalty.initialized)Penalty.init();else Penalty.draw()}if(id==='game-crash'&&typeof Crash!=='undefined'){Crash.renderHistoryStrip();Crash.initIdleState()}if(id==='history')this.renderHistory();window.scrollTo(0,0)},loadGame(g){this.nav('game-'+g)},showModal(id){document.getElementById(id)?.classList.remove('hidden')},hideModal(id){document.getElementById(id)?.classList.add('hidden')},renderHistory(){const tb=document.getElementById('history-tbody'),empty=document.getElementById('history-empty');if(!tb||!empty)return;tb.innerHTML='';empty.classList.toggle('hidden',Sys.history.length>0);Sys.history.forEach(h=>{const tr=document.createElement('tr'),win=Number(h.prize)>0;tr.innerHTML=`<td>${h.time}</td><td><strong>${h.game}</strong></td><td>${Number(h.bet).toFixed(2)}</td><td class="${win?'text-success':'text-danger'}">${h.mult}</td><td class="${win?'text-success':''}">+${Number(h.prize).toFixed(2)}</td><td>${h.result}</td>`;tb.appendChild(tr)})}};
+
+const Mines={grid:[],playing:false,bet:0,bombs:3,step:0,mult:1,safeRemaining:0,initUI(){const c=document.getElementById('mines-grid');c.innerHTML='';this.grid=[];for(let i=0;i<25;i++){const e=document.createElement('div');e.className='mine-cell';e.onclick=()=>this.clickCell(i);c.appendChild(e);this.grid.push({el:e,isBomb:false,revealed:false})}document.getElementById('mines-mult-display').innerText='1.00x'},start(){if(this.playing)return;const b=parseFloat(document.getElementById('mines-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.bombs=parseInt(document.getElementById('mines-bombs').value);this.step=0;this.mult=1;this.safeRemaining=25-this.bombs;this.playing=true;Sys.updateBalance(-b);this.initUI();let p=0;while(p<this.bombs){const i=Math.floor(Math.random()*25);if(!this.grid[i].isBomb){this.grid[i].isBomb=true;p++}}document.getElementById('mines-btn-bet').classList.add('hidden');document.getElementById('mines-btn-cashout').classList.remove('hidden');document.getElementById('mines-bombs').disabled=true;document.getElementById('mines-bet').disabled=true;this.updateUI()},clickCell(i){if(!this.playing||this.grid[i].revealed)return;const c=this.grid[i];c.revealed=true;c.el.classList.add('revealed');if(c.isBomb){c.el.classList.add('bomb');c.el.innerText='💣';AudioSys.play('explosion');this.endGame(false);return}c.el.classList.add('diamond');c.el.innerText='💎';this.step++;this.safeRemaining--;const cellsLeft=25-(this.step-1),safeLeft=cellsLeft-this.bombs;this.mult*=Math.max(1.01,(cellsLeft/safeLeft)*.97);AudioSys.play('tick');this.updateUI();if(this.safeRemaining<=0)this.cashout()},cashout(){if(!this.playing||this.step<=0)return;const prize=this.bet*this.mult;Sys.updateBalance(prize);this.endGame(true,prize);AudioSys.play('win')},endGame(win,prize=0){this.playing=false;this.grid.forEach(c=>{if(!c.revealed){c.el.classList.add('revealed');c.el.style.opacity='.5';c.el.classList.add(c.isBomb?'bomb':'diamond');c.el.innerText=c.isBomb?'💣':'💎'}});document.getElementById('mines-btn-bet').classList.remove('hidden');document.getElementById('mines-btn-cashout').classList.add('hidden');document.getElementById('mines-bombs').disabled=false;document.getElementById('mines-bet').disabled=false;if(win){Sys.addHistory('Mine Bomber',this.bet,this.mult.toFixed(2)+'x',prize,'Ganhou');document.getElementById('mines-msg').innerHTML=`<span class="text-success">Você coletou ${prize.toFixed(2)} moedas!</span>`}else{Sys.addHistory('Mine Bomber',this.bet,'0.00x',0,'Bomba');document.getElementById('mines-msg').innerHTML=`<span class="text-danger">BOOM! Você perdeu ${this.bet.toFixed(2)}.</span>`}},updateUI(){document.getElementById('mines-mult-display').innerText=this.mult.toFixed(2)+'x';document.getElementById('mines-msg').innerText=`Restam ${this.safeRemaining} diamantes e ${this.bombs} bombas.`;if(this.step)document.getElementById('mines-btn-cashout').innerText=`COLETAR ${(this.bet*this.mult).toFixed(2)}`}};
+
+const Slots={
+ symbols:['🐯','💎','🪙','🧧','🍊','⭐','🔔'],
+ paytable:{'🐯':50,'💎':20,'🪙':10,'🧧':8,'🍊':5,'⭐':3,'🔔':2},
+ // Oito linhas válidas do jogo da velha: 3 horizontais, 3 verticais e 2 diagonais.
+ lines:[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],
+ spinning:false,
+ initUI(){
+  const g=document.getElementById('slots-grid');
+  g.innerHTML='';
+  for(let i=0;i<9;i++){
+   const e=document.createElement('div');
+   e.className='slot-cell';
+   e.innerText=this.symbols[Math.floor(Math.random()*this.symbols.length)];
+   g.appendChild(e);
+  }
+ },
+ spin(){
+  if(this.spinning)return;
+  const b=Number(document.getElementById('slots-bet').value);
+  if(!Sys.checkBalance(b))return;
+  this.spinning=true;
+  Sys.updateBalance(-b);
+  const cells=[...document.querySelectorAll('.slot-cell')];
+  cells.forEach(c=>c.classList.remove('win-highlight','dim'));
+  const button=document.getElementById('slots-btn-spin');
+  button.disabled=true;
+  const message=document.getElementById('slots-msg');
+  message.style.opacity=0;
+  AudioSys.play('spin');
+  const result=Array.from({length:9},()=>this.symbols[Math.floor(Math.random()*this.symbols.length)]);
+  let n=0;
+  const iv=setInterval(()=>{
+   cells.forEach(c=>c.innerText=this.symbols[Math.floor(Math.random()*this.symbols.length)]);
+   if(++n>=12){
+    clearInterval(iv);
+    cells.forEach((c,i)=>c.innerText=result[i]);
+    this.resolveSpin(b,result);
+   }
+  },70);
+ },
+ resolveSpin(b,result){
+  let total=0;
+  const winningLines=[];
+  this.lines.forEach(line=>{
+   const symbol=result[line[0]];
+   // Três símbolos literalmente iguais; o tigre NÃO substitui outros símbolos.
+   if(symbol===result[line[1]]&&symbol===result[line[2]]){
+    total+=this.paytable[symbol];
+    winningLines.push(line);
+   }
+  });
+  const cells=[...document.querySelectorAll('.slot-cell')];
+  const message=document.getElementById('slots-msg');
+  if(total>0){
+   const winningPositions=new Set(winningLines.flat());
+   cells.forEach((c,i)=>c.classList.add(winningPositions.has(i)?'win-highlight':'dim'));
+   const prize=Math.round(b*total*100)/100;
+   Sys.updateBalance(prize);
+   Sys.addHistory('Tiger Treasure',b,total+'x',prize,'Linha completa');
+   message.innerText=total+'x !';
+   message.style.opacity=1;
+   AudioSys.play('win');
+  }else{
+   Sys.addHistory('Tiger Treasure',b,'0x',0,'Sem linha');
+  }
+  this.spinning=false;
+  document.getElementById('slots-btn-spin').disabled=false;
+ }
+};
+
+const Penalty={state:'IDLE',playing:false,initialized:false,bet:0,step:0,mults:[1.92,3.84,7.68,15.36,30.72],zone:{TL:{x:250,y:135},BL:{x:250,y:245},C:{x:400,y:190},TR:{x:550,y:135},BR:{x:550,y:245}},goal:true,phase:'NONE',progress:0,anim:null,credits(){return Sys.balance},setBet(v){if(this.state==='IDLE')document.getElementById('penalty-bet').value=v},setMaxBet(){if(this.state==='IDLE')document.getElementById('penalty-bet').value=Math.floor(Sys.balance)},start(){if(this.state!=='IDLE')return;const b=parseFloat(document.getElementById('penalty-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.step=0;Sys.updateBalance(-b);this.state='AIMING';this.playing=true;this.resetField();this.updateUI();this.hidePopup()},shootZone(z){if(this.state!=='AIMING')return;this.state='ANIMATING';this.goal=Math.random()<.52;const t=this.zone[z];this.ball.tx=t.x;this.ball.ty=t.y;const keys=Object.keys(this.zone),wk=keys.filter(k=>k!==z)[Math.floor(Math.random()*4)],g=this.goal?this.zone[wk]:t;this.gk.tx=g.x;this.gk.ty=g.y;this.phase='RUN';this.progress=0;this.updateUI()},nextPenalty(){if(this.state!=='DECISION')return;this.step++;this.state='AIMING';this.resetField();this.hidePopup();this.updateUI()},cashout(){if(this.state!=='DECISION')return;const m=this.mults[this.step];if(!Number.isFinite(m)||!Number.isFinite(this.bet))return;const p=Math.floor(this.bet*m);Sys.updateBalance(p);Sys.addHistory('Penalty Clash',this.bet,m+'x',p,'Coletado');this.showPopup('CRÉDITOS COLETADOS!',`Você recebeu ${p.toLocaleString('pt-BR')} CR virtuais.`);this.state='IDLE';this.playing=false;this.updateUI()},resolve(){if(this.goal){const m=this.mults[this.step];if(this.step===4){const p=Math.floor(this.bet*m);Sys.updateBalance(p);Sys.addHistory('Penalty Clash',this.bet,m+'x',p,'5 Gols');this.showPopup('SUPER GOL! 30,72x',`Você acertou os 5 pênaltis e ganhou ${p.toLocaleString('pt-BR')} CR!`);this.state='IDLE'}else{this.showPopup('GOL!',`Multiplicador atual: ${m}x`);this.state='DECISION'}}else{Sys.addHistory('Penalty Clash',this.bet,'0.00x',0,'Defesa');this.showPopup('DEFESA!','O goleiro pegou! Você perdeu os créditos da rodada.');this.state='IDLE'}if(this.state==='IDLE')this.playing=false;this.updateUI()},showPopup(t,s){document.getElementById('pc-popup-title').textContent=t;document.getElementById('pc-popup-sub').textContent=s;document.getElementById('pc-popup').classList.add('show')},hidePopup(){document.getElementById('pc-popup').classList.remove('show')},toggleRules(){document.getElementById('pc-modal').classList.toggle('active')},resetField(){this.ball={x:400,y:420,tx:400,ty:420,r:14};this.gk={x:400,y:200,tx:400,ty:200};this.kicker={x:330,y:430};this.phase='NONE';this.progress=0},updateUI(){document.getElementById('pc-credits').textContent=Sys.balance.toLocaleString('pt-BR',{maximumFractionDigits:0})+' CR';document.getElementById('pc-tracker').textContent=`PÊNALTI: ${this.step+1}/5`;for(let i=0;i<5;i++){const e=document.getElementById('pc-m'+(i+1));e.className='pc-mult';if(i<this.step)e.classList.add('done');else if(i===this.step)e.classList.add('active')}const z=document.getElementById('pc-zones'),st=document.getElementById('pc-start'),ca=document.getElementById('pc-cash'),co=document.getElementById('pc-cont'),inp=document.getElementById('penalty-bet');z.classList.toggle('active',this.state==='AIMING');st.style.display=this.state==='IDLE'?'block':'none';ca.style.display=this.state==='DECISION'?'block':'none';co.style.display=this.state==='DECISION'&&this.step<4?'block':'none';inp.disabled=this.state!=='IDLE';if(this.state==='DECISION'){const m=this.mults[this.step];document.getElementById('pc-cash-val').textContent=Number.isFinite(m)&&Number.isFinite(this.bet)?Math.floor(this.bet*m).toLocaleString('pt-BR'):'0'}},init(){if(this.initialized)return;this.initialized=true;this.canvas=document.getElementById('pc-canvas');this.ctx=this.canvas.getContext('2d');this.resetField();document.getElementById('pc-rules').onclick=()=>this.toggleRules();document.getElementById('pc-sound').onclick=()=>{AudioSys.init();AudioSys.toggle()};document.getElementById('pc-reset').onclick=()=>{if(confirm('Deseja reiniciar apenas a rodada do Penalty Clash? O saldo continua sendo o mesmo do Royal Play.')){this.state='IDLE';this.playing=false;this.step=0;this.bet=0;this.resetField();this.hidePopup();this.updateUI()}};this.loop();this.updateUI()},draw(){const c=this.ctx,w=800,h=500;c.clearRect(0,0,w,h);let g=c.createLinearGradient(0,0,0,300);g.addColorStop(0,'#060a12');g.addColorStop(1,'#111b33');c.fillStyle=g;c.fillRect(0,0,w,h);c.fillStyle='#166534';c.fillRect(0,260,w,240);c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=3;c.strokeRect(100,260,600,200);c.strokeStyle='#fff';c.lineWidth=8;c.beginPath();c.moveTo(180,270);c.lineTo(180,100);c.lineTo(620,100);c.lineTo(620,270);c.stroke();c.strokeStyle='rgba(255,255,255,.2)';c.lineWidth=1;for(let x=180;x<=620;x+=15){c.beginPath();c.moveTo(x,100);c.lineTo(x+(x-400)*.1,270);c.stroke()}for(let y=100;y<=270;y+=12){c.beginPath();c.moveTo(180,y);c.lineTo(620,y);c.stroke()}this.drawMan(this.gk.x,this.gk.y,'#eab308');this.drawMan(this.kicker.x,this.kicker.y,'#2563eb');c.fillStyle='#fff';c.beginPath();c.arc(this.ball.x,this.ball.y,this.ball.r,0,Math.PI*2);c.fill();c.fillStyle='#111';c.beginPath();c.arc(this.ball.x,this.ball.y,this.ball.r*.4,0,Math.PI*2);c.fill()},drawMan(x,y,col){const c=this.ctx;c.fillStyle=col;c.fillRect(x-14,y-25,28,40);c.fillStyle='#fca5a5';c.beginPath();c.arc(x,y-35,10,0,Math.PI*2);c.fill();c.strokeStyle='#1e293b';c.lineWidth=6;c.beginPath();c.moveTo(x-10,y+15);c.lineTo(x-10,y+40);c.moveTo(x+10,y+15);c.lineTo(x+10,y+40);c.stroke()},loop(){if(this.state==='ANIMATING'){if(this.phase==='RUN'){this.progress+=.05;this.kicker.x=330+(380-330)*this.progress;if(this.progress>=1){this.phase='FLIGHT';this.progress=0;AudioSys.play('tick')}}else if(this.phase==='FLIGHT'){this.progress+=.06;this.ball.x=400+(this.ball.tx-400)*this.progress;this.ball.y=420+(this.ball.ty-420)*this.progress;this.ball.r=14-6*this.progress;this.gk.x=400+(this.gk.tx-400)*this.progress;this.gk.y=200+(this.gk.ty-200)*this.progress;if(this.progress>=1){this.resolve()}}}this.draw();requestAnimationFrame(()=>this.loop())}};
+
+const Crash={state:'idle',mult:1,bet:0,loop:null,crashPoint:0,startTime:0,hasCashedOut:false,historyData:[],initIdleState(){if(this.state==='idle'||this.state==='crashed'){this.resetBtn();document.getElementById('crash-msg').innerText='Aguardando aposta...';document.getElementById('crash-mult').classList.remove('crashed');document.getElementById('crash-mult').innerText='1.00x';document.getElementById('crash-plane').style.transform='translate(0,0)'}},toggleBet(){AudioSys.init();if(this.state==='flying'&&!this.hasCashedOut)return this.cashOut();if(this.state==='idle'){const b=parseFloat(document.getElementById('crash-bet').value);if(!Sys.checkBalance(b))return;this.bet=b;this.hasCashedOut=false;Sys.updateBalance(-b);this.startFlight()}},startFlight(){this.state='flying';this.mult=1;this.startTime=performance.now();document.getElementById('crash-msg').innerText='Avião decolou!';const r=Math.random();this.crashPoint=r<.03?1:Math.max(1.05,.98/r);const btn=document.getElementById('crash-btn-bet'),m=document.getElementById('crash-mult'),plane=document.getElementById('crash-plane');btn.className='btn btn-success';const tick=(now)=>{if(this.state!=='flying')return;const t=now-this.startTime;this.mult=Math.exp(t/5000);if(this.mult>=this.crashPoint){this.mult=this.crashPoint;this.crash();return}m.innerText=this.mult.toFixed(2)+'x';plane.style.transform=`translate(${Math.min(320,t/15)}px,-${Math.min(220,t/22)}px)`;btn.innerText=`PARAR / COLETAR ${(this.bet*this.mult).toFixed(2)}`;this.loop=requestAnimationFrame(tick)};this.loop=requestAnimationFrame(tick)},cashOut(){if(this.hasCashedOut||this.state!=='flying')return;this.hasCashedOut=true;const p=this.bet*this.mult;Sys.updateBalance(p);Sys.addHistory('Sky Crash',this.bet,this.mult.toFixed(2)+'x',p,'Parou/Coletou');document.getElementById('crash-msg').innerHTML=`<span class="text-success">Lucro coletado: ${p.toFixed(2)} moedas!</span>`;AudioSys.play('win');this.state='idle';cancelAnimationFrame(this.loop);this.resetBtn()},crash(){this.state='crashed';cancelAnimationFrame(this.loop);const m=document.getElementById('crash-mult');m.innerText=this.mult.toFixed(2)+'x';m.classList.add('crashed');document.getElementById('crash-msg').innerHTML='<span class="text-danger">CRASH! O avião caiu.</span>';if(!this.hasCashedOut)Sys.addHistory('Sky Crash',this.bet,'0.00x',0,'Crash');this.historyData.unshift(this.mult);this.historyData=this.historyData.slice(0,10);this.renderHistoryStrip();this.resetBtn();setTimeout(()=>{this.state='idle';this.initIdleState()},1800)},resetBtn(){const b=document.getElementById('crash-btn-bet');b.className='btn btn-gold';b.innerText='APOSTAR'},renderHistoryStrip(){const s=document.getElementById('crash-history-strip');if(!s)return;s.innerHTML='';this.historyData.forEach(m=>{const e=document.createElement('div');e.className='crash-hist-badge '+(m>=2?'high':'low');e.innerText=m.toFixed(2)+'x';s.appendChild(e)})}};
+
+window.addEventListener('load',()=>{Sys.updateBalance(0);Mines.initUI();Slots.initUI();Penalty.init();Crash.renderHistoryStrip();UI.nav('home')});
+
+// Links de recuperação criam uma sessão temporária: não abrir o jogo antes de trocar a senha.
+let recoveringPassword = /(?:[?#&])type=recovery(?:&|$)/.test(location.href);
+supabaseClient.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+        recoveringPassword = true;
+        Auth.showRecovery();
+    }
+});
+
+async function checkAuth() {
+    try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (recoveringPassword) {
+            Auth.showRecovery();
+        } else if (!error && data.session) {
+            await Auth.showApp();
+        } else {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+        }
+    } catch (e) {
+        Auth.message('Não foi possível verificar a sessão. Atualize a página.');
+    }
+}
+checkAuth();
+window.addEventListener('focus',async()=>{
+ if(!Sys.ready||Sys.pending||Mines.playing||Slots.spinning||Penalty.playing||Crash.state==='flying')return;
+ try{const {data,error}=await supabaseClient.rpc('royal_get_profile');if(!error&&data){Sys.balance=Number(data.balance);Sys.renderBalance()}}catch(e){console.warn('Sincronização adiada',e)}
+});
+    
+</script>
+</body>
+</html>
